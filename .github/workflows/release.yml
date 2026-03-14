@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------------
+  # 1. Extract version from pyproject.toml and run the test suite
+  # -------------------------------------------------------------------
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(python3 -c "
+          import re, pathlib
+          text = pathlib.Path('pyproject.toml').read_text()
+          m = re.search(r'^version\s*=\s*\"([^\"]+)\"', text, re.MULTILINE)
+          print(m.group(1))
+          ")
+          echo "version=$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches pyproject.toml version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PYPROJECT_VERSION="${{ steps.version.outputs.version }}"
+          if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match pyproject.toml version ($PYPROJECT_VERSION)"
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install and test
+        run: |
+          pip install -e ".[dev]"
+          pytest -q
+
+  # -------------------------------------------------------------------
+  # 2. Build Flatpak bundle
+  # -------------------------------------------------------------------
+  build-flatpak:
+    needs: prepare
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          manifest-path: flatpak/io.github.protoncleanup.ProtonCleanup.yaml
+          bundle: proton-cleanup.flatpak
+          cache-key: flatpak-builder-${{ github.sha }}
+
+      - name: Rename bundle with version
+        run: mv proton-cleanup.flatpak proton-cleanup-${{ needs.prepare.outputs.version }}.flatpak
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-bundle
+          path: proton-cleanup-${{ needs.prepare.outputs.version }}.flatpak
+
+  # -------------------------------------------------------------------
+  # 3. Create GitHub Release with assets
+  # -------------------------------------------------------------------
+  release:
+    needs: [prepare, build-flatpak]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: flatpak-bundle
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Proton Cleanup v${{ needs.prepare.outputs.version }}
+          generate_release_notes: true
+          files: proton-cleanup-${{ needs.prepare.outputs.version }}.flatpak

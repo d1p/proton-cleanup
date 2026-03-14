@@ -12,4 +12,13 @@
     </p>
   </description>
   <launchable type="desktop-id">io.github.protoncleanup.ProtonCleanup.desktop</launchable>
+  <url type="homepage">https://github.com/d1p/proton-cleanup</url>
+  <url type="bugtracker">https://github.com/d1p/proton-cleanup/issues</url>
+  <releases>
+    <release version="0.1.0" date="2026-03-14">
+      <description>
+        <p>Initial release.</p>
+      </description>
+    </release>
+  </releases>
 </component>

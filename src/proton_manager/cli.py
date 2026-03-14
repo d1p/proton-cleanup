@@ -5,6 +5,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from proton_manager import __version__
 from proton_manager.model import Confidence
 
 
@@ -54,7 +55,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 0.1.0",
+        version=f"%(prog)s {__version__}",
     )
     return p
 

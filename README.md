@@ -405,6 +405,9 @@ No terminal interaction is needed, no interactive input is required.
 
 ```
 proton-cleanup/
+├── .github/workflows/             # CI and automated release
+│   ├── ci.yml
+│   └── release.yml
 ├── LICENSE
 ├── Makefile
 ├── README.md
@@ -493,3 +496,21 @@ flatpak --user install --bundle -y dist/proton-cleanup.flatpak
 | `steamapps/compatdata/<id>/version` | Prefix Proton version string |
 | `steamapps/compatdata/<id>/config_info` | Binary blob — Proton path regex extracted as fallback |
 | `steamapps/libraryfolders.vdf` | Additional Steam library paths |
+
+### Releasing a new version
+
+1. Bump the version in `pyproject.toml`
+2. Update `data/io.github.protoncleanup.ProtonCleanup.metainfo.xml` with a new `<release>` entry
+3. Commit, tag, and push:
+
+```bash
+git commit -am "Release v0.2.0"
+git tag v0.2.0
+git push origin main --tags
+```
+
+The [release workflow](.github/workflows/release.yml) will automatically:
+- Verify the tag matches the `pyproject.toml` version
+- Run the test suite
+- Build a Flatpak bundle in CI
+- Create a GitHub Release with the `.flatpak` bundle attached
