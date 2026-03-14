@@ -4,10 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "proton-cleanup"
-version = "0.2.5"
+version = "0.2.6"
 description = "Scan and clean up Steam Proton compatibility environments"
 readme = "README.md"
 license = "MIT"
+authors = [
+    { name = "Debashis Dip", email = "nihan.dip@gmail.com" },
+]
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 keywords = ["steam", "proton", "wine", "steam-deck", "cleanup"]
