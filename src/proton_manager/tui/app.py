@@ -196,6 +196,7 @@ class ProtonManagerApp(App):
         Binding("escape", "clear_filter", "Clear"),
         Binding("s", "cycle_sort", "Sort"),
         Binding("o", "toggle_orphans", "Orphans"),
+        Binding("space", "toggle_selection", "Select"),
         Binding("d", "delete_entry", "Delete"),
         Binding("e", "export_json", "Export JSON"),
         Binding("?", "help", "Help"),
@@ -286,7 +287,7 @@ class ProtonManagerApp(App):
 
         return entries
 
-    def _refresh_table(self) -> None:
+    def _refresh_table(self, cursor_row: int | None = None) -> None:
         visible = self._visible_entries()
         table = self.query_one(GameTable)
         self._current_entries = visible
@@ -314,8 +315,13 @@ class ProtonManagerApp(App):
             orphans=orphan_count,
             hide_orphans=self._hide_orphans,
         )
-        # Reset detail pane
-        self.query_one(DetailPane).show_entry(visible[0] if visible else None)
+        if cursor_row is not None and visible:
+            row = min(cursor_row, len(visible) - 1)
+            table.move_cursor(row=row)
+            self.query_one(DetailPane).show_entry(visible[row])
+        else:
+            # Reset detail pane
+            self.query_one(DetailPane).show_entry(visible[0] if visible else None)
 
     # ------------------------------------------------------------------
     # Events
@@ -368,6 +374,18 @@ class ProtonManagerApp(App):
     def action_cycle_sort(self) -> None:
         self.query_one(GameTable).cycle_sort()
 
+    def action_toggle_selection(self) -> None:
+        if not self._current_entries:
+            return
+        table = self.query_one(GameTable)
+        row = table.cursor_row
+        try:
+            entry = self._current_entries[row]
+        except IndexError:
+            return
+        table.toggle_selection(entry.app_id + entry.kind.value)
+        self._refresh_table(cursor_row=row)
+
     def action_rescan(self) -> None:
         if self._rescan_fn is None:
             self.notify("No rescan function registered.", severity="warning")
@@ -392,24 +410,34 @@ class ProtonManagerApp(App):
             self.notify("No entries available.", severity="warning")
             return
         table = self.query_one(GameTable)
-        try:
-            entry = self._current_entries[table.cursor_row]
-        except IndexError:
-            self.notify("No entry selected.", severity="warning")
-            return
+
+        selected = table.selected_keys
+        if selected:
+            to_delete = [e for e in self._current_entries if e.app_id + e.kind.value in selected]
+        else:
+            try:
+                to_delete = [self._current_entries[table.cursor_row]]
+            except IndexError:
+                self.notify("No entry selected.", severity="warning")
+                return
 
         from proton_manager.tui.delete_dialog import DeleteConfirmScreen, deleteable_path
 
-        if deleteable_path(entry) is None:
-            self.notify("This entry has no path to delete.", severity="warning")
+        deleteable = [e for e in to_delete if deleteable_path(e) is not None]
+        if not deleteable:
+            self.notify("Selected entries have no paths to delete.", severity="warning")
             return
 
-        def _on_deleted(deleted: GameEntry | None) -> None:
-            if deleted is None:
+        def _on_deleted(deleted: list[GameEntry] | None) -> None:
+            if not deleted:
                 return
-            key = (deleted.app_id, deleted.kind)
-            self._all_entries = [e for e in self._all_entries if (e.app_id, e.kind) != key]
+            keys = {(e.app_id, e.kind) for e in deleted}
+            self._all_entries = [e for e in self._all_entries if (e.app_id, e.kind) not in keys]
+            self.query_one(GameTable).clear_selection()
             self._refresh_table()
-            self.notify(f"Deleted: {deleted.name}")
+            if len(deleted) == 1:
+                self.notify(f"Deleted: {deleted[0].name}")
+            else:
+                self.notify(f"Deleted {len(deleted)} entries.")
 
-        self.push_screen(DeleteConfirmScreen(entry), _on_deleted)
+        self.push_screen(DeleteConfirmScreen(deleteable), _on_deleted)

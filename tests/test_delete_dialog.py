@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from textual.widgets import DataTable, Input, Static
+from textual.widgets import DataTable, Static
 
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.tui.app import ProtonManagerApp
@@ -191,7 +191,7 @@ async def test_dialog_composes_shows_table(tmp_path):
     entry = _steam_entry(tmp_path)
     app = ProtonManagerApp(entries=[entry])
     async with app.run_test(size=(120, 40)) as pilot:
-        app.push_screen(DeleteConfirmScreen(entry))
+        app.push_screen(DeleteConfirmScreen([entry]))
         await pilot.pause()
         # After push_screen the modal IS app.screen
         tbl = app.screen.query_one("#info-table", DataTable)
@@ -204,7 +204,7 @@ async def test_dialog_escape_cancels(tmp_path):
     dismissed: list = []
     app = ProtonManagerApp(entries=[entry])
     async with app.run_test(size=(120, 40)) as pilot:
-        app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
+        app.push_screen(DeleteConfirmScreen([entry]), dismissed.append)
         await pilot.pause()
         await pilot.press("escape")
         await pilot.pause()
@@ -217,7 +217,7 @@ async def test_dialog_cancel_button(tmp_path):
     dismissed: list = []
     app = ProtonManagerApp(entries=[entry])
     async with app.run_test(size=(120, 40)) as pilot:
-        app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
+        app.push_screen(DeleteConfirmScreen([entry]), dismissed.append)
         await pilot.pause()
         await pilot.click("#btn-cancel")
         await pilot.pause()
@@ -225,81 +225,39 @@ async def test_dialog_cancel_button(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_dialog_empty_password_shows_error(tmp_path):
-    entry = _steam_entry(tmp_path)
-    dismissed: list = []
-    app = ProtonManagerApp(entries=[entry])
-    async with app.run_test(size=(120, 40)) as pilot:
-        app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
-        await pilot.pause()
-        # Click delete without a password
-        await pilot.click("#btn-delete")
-        await pilot.pause()
-        error_lbl = app.screen.query_one("#error-label", Static)
-        assert "required" in str(error_lbl.content).lower()
-        assert dismissed == []  # dialog still open
-
-
-@pytest.mark.asyncio
-async def test_dialog_wrong_password_shows_error(tmp_path):
+async def test_dialog_delete_button_calls_delete(tmp_path):
     entry = _steam_entry(tmp_path)
     dismissed: list = []
     with patch(
-        "proton_manager.tui.delete_dialog.authenticate",
-        return_value=(False, "Incorrect password"),
-    ):
+        "proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")
+    ) as mock_del:
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:
-            app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
+            app.push_screen(DeleteConfirmScreen([entry]), dismissed.append)
             await pilot.pause()
-            app.screen.query_one("#password-input", Input).value = "wrongpass"
             await pilot.click("#btn-delete")
             await pilot.pause()
-            error_lbl = app.screen.query_one("#error-label", Static)
-            assert "incorrect" in str(error_lbl.content).lower()
-            assert dismissed == []
-
-
-@pytest.mark.asyncio
-async def test_dialog_correct_password_dismisses_with_entry(tmp_path):
-    entry = _steam_entry(tmp_path)
-    dismissed: list = []
-    with (
-        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
-        patch("proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")) as mock_del,
-    ):
-        app = ProtonManagerApp(entries=[entry])
-        async with app.run_test(size=(120, 40)) as pilot:
-            app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
-            await pilot.pause()
-            app.screen.query_one("#password-input", Input).value = "correctpass"
-            await pilot.click("#btn-delete")
-            await pilot.pause()
-        assert dismissed == [entry]
+        assert dismissed == [[entry]]
         mock_del.assert_called_once_with(entry)
 
 
 @pytest.mark.asyncio
 async def test_dialog_delete_failure_shows_error(tmp_path):
-    """delete_entry returning an error should keep the dialog open."""
+    """delete_entry returning an error should show the error and keep the dialog open."""
     entry = _steam_entry(tmp_path)
     dismissed: list = []
-    with (
-        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
-        patch(
-            "proton_manager.tui.delete_dialog.delete_entry",
-            return_value=(False, "Permission denied: /some/path"),
-        ),
+    with patch(
+        "proton_manager.tui.delete_dialog.delete_entry",
+        return_value=(False, "Permission denied: /some/path"),
     ):
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:
-            app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
+            app.push_screen(DeleteConfirmScreen([entry]), dismissed.append)
             await pilot.pause()
-            app.screen.query_one("#password-input", Input).value = "pass"
             await pilot.click("#btn-delete")
             await pilot.pause()
             error_lbl = app.screen.query_one("#error-label", Static)
-            assert "permission" in str(error_lbl.content).lower()
+            assert "permission" in str(error_lbl.render()).lower()
             assert dismissed == []
 
 
@@ -325,17 +283,12 @@ async def test_app_delete_action_removes_entry(tmp_path):
     )
     from proton_manager.tui.widgets import GameTable
 
-    with (
-        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
-        patch("proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")),
-    ):
+    with patch("proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")):
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:
             assert app.query_one(GameTable).row_count == 1
             await pilot.press("d")
             await pilot.pause()
-            # Dialog is open; app.screen is now the modal
-            app.screen.query_one("#password-input", Input).value = "mypassword"
             await pilot.click("#btn-delete")
             await pilot.pause()
             assert app.query_one(GameTable).row_count == 0

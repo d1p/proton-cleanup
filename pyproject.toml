@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "proton-cleanup"
-version = "0.2.7"
+version = "0.2.8"
 description = "Scan and clean up Steam Proton compatibility environments"
 readme = "README.md"
 license = "MIT"

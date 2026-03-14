@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import shutil
-import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, DataTable, Input, Label, Static
+from textual.widgets import Button, DataTable, Static
 
 from proton_manager.model import GameEntry, GameKind
 
@@ -72,38 +71,6 @@ def entry_timestamps(entry: GameEntry) -> tuple[str, str]:
         return created, _fmt_ts(st.st_mtime)
     except OSError:
         return "—", "—"
-
-
-# ---------------------------------------------------------------------------
-# Authentication
-# ---------------------------------------------------------------------------
-
-
-def authenticate(password: str) -> tuple[bool, str]:
-    """Verify *password* against the current unix account via ``sudo``.
-
-    Uses ``sudo -kS /bin/true``:
-    * ``-k`` invalidates any cached sudo timestamp so the password is always
-      tested even if the user recently ran another sudo command.
-    * ``-S`` reads the password from stdin instead of the TTY.
-
-    Returns ``(True, "")`` on success or ``(False, reason)`` on failure.
-    """
-    try:
-        proc = subprocess.run(
-            ["sudo", "-kS", "/bin/true"],
-            input=password + "\n",
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if proc.returncode == 0:
-            return True, ""
-        return False, "Incorrect password (or insufficient sudo rights for this account)"
-    except FileNotFoundError:
-        return False, "sudo not found — cannot authenticate on this system"
-    except subprocess.TimeoutExpired:
-        return False, "Authentication timed out"
 
 
 # ---------------------------------------------------------------------------
@@ -169,11 +136,12 @@ _KIND_OBJECT: dict[GameKind, str] = {
 }
 
 
-class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
-    """Modal confirmation dialog for deleting a Proton environment.
+class DeleteConfirmScreen(ModalScreen[list[GameEntry] | None]):
+    """Modal confirmation dialog for deleting one or more Proton environments.
 
-    Dismisses with the deleted :class:`~proton_manager.model.GameEntry` on
-    success, or ``None`` when the user cancels.
+    Dismisses with the list of successfully deleted
+    :class:`~proton_manager.model.GameEntry` objects on success,
+    or ``None`` when the user cancels.
     """
 
     DEFAULT_CSS = """
@@ -206,33 +174,24 @@ class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
         border: round $panel;
     }
 
+    #delete-list {
+        height: auto;
+        max-height: 10;
+        margin-bottom: 1;
+        border: round $panel;
+        padding: 0 1;
+        overflow-y: auto;
+    }
+
     #warn-text {
         height: 3;
         margin-bottom: 1;
         padding: 0 1;
     }
 
-    #password-section {
-        height: auto;
-        border: round $panel;
-        padding: 0 1;
-        margin-bottom: 0;
-    }
-
-    #password-label {
-        height: 1;
-        color: $text-muted;
-        margin-top: 1;
-    }
-
-    #password-input {
-        margin-bottom: 0;
-    }
-
     #error-label {
         color: $error;
-        height: 1;
-        margin-top: 0;
+        height: auto;
         margin-bottom: 1;
     }
 
@@ -251,31 +210,37 @@ class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
         Binding("escape", "cancel", "Cancel", show=False),
     ]
 
-    def __init__(self, entry: GameEntry) -> None:
+    def __init__(self, entries: list[GameEntry]) -> None:
         super().__init__()
-        self._entry = entry
+        self._entries = entries
+
+    def _entry_list(self) -> str:
+        lines = []
+        for e in self._entries:
+            path = deleteable_path(e)
+            lines.append(f"  [bold]{e.name}[/bold]  [dim]{path or '—'}[/dim]")
+        return "\n".join(lines)
 
     def compose(self) -> ComposeResult:
-        entry = self._entry
-        title = _KIND_TITLE.get(entry.kind, "Delete Proton Environment")
-        obj_label = _KIND_OBJECT.get(entry.kind, "directory")
+        if len(self._entries) == 1:
+            entry = self._entries[0]
+            title = _KIND_TITLE.get(entry.kind, "Delete Proton Environment")
+            obj_label = _KIND_OBJECT.get(entry.kind, "directory")
+        else:
+            title = f"⚠  Delete {len(self._entries)} Environments"
+            obj_label = f"{len(self._entries)} directories"
         with Vertical(id="dialog"):
             yield Static(title, id="dialog-title")
-            yield DataTable(id="info-table", show_cursor=False)
+            if len(self._entries) == 1:
+                yield DataTable(id="info-table", show_cursor=False)
+            else:
+                yield Static(self._entry_list(), id="delete-list")
             yield Static(
                 f"[yellow]⚠  This will permanently delete the {obj_label}.[/yellow]\n"
                 "[dim]   This action cannot be undone.[/dim]",
                 id="warn-text",
             )
-            with Vertical(id="password-section"):
-                yield Label("Enter your account password to confirm:", id="password-label")
-                yield Input(
-                    placeholder="Password",
-                    password=True,
-                    id="password-input",
-                    tooltip="Your login password — used to verify your identity before deletion",
-                )
-                yield Static("", id="error-label")
+            yield Static("", id="error-label")
             with Horizontal(id="buttons"):
                 yield Button(
                     "Cancel",
@@ -287,23 +252,22 @@ class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
                     "⚠  Delete",
                     id="btn-delete",
                     variant="error",
-                    tooltip="Permanently delete this environment after password verification",
+                    tooltip="Permanently delete the selected environment(s)",
                 )
 
     def on_mount(self) -> None:
-        entry = self._entry
-        del_path = deleteable_path(entry)
-        created, modified = entry_timestamps(entry)
-
-        tbl = self.query_one("#info-table", DataTable)
-        tbl.add_column("Field", width=14)
-        tbl.add_column("Value", width=60)
-        tbl.add_row("Name", entry.name)
-        tbl.add_row("Path", str(del_path) if del_path else "—")
-        tbl.add_row("Created", created)
-        tbl.add_row("Last Modified", modified)
-
-        self.query_one("#password-input", Input).focus()
+        if len(self._entries) == 1:
+            entry = self._entries[0]
+            del_path = deleteable_path(entry)
+            created, modified = entry_timestamps(entry)
+            tbl = self.query_one("#info-table", DataTable)
+            tbl.add_column("Field", width=14)
+            tbl.add_column("Value", width=60)
+            tbl.add_row("Name", entry.name)
+            tbl.add_row("Path", str(del_path) if del_path else "—")
+            tbl.add_row("Created", created)
+            tbl.add_row("Last Modified", modified)
+        self.query_one("#btn-cancel", Button).focus()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "btn-cancel":
@@ -311,32 +275,20 @@ class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
         elif event.button.id == "btn-delete":
             self._attempt_delete()
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        if event.input.id == "password-input":
-            self._attempt_delete()
-
     def action_cancel(self) -> None:
         self.dismiss(None)
 
     def _attempt_delete(self) -> None:
-        pwd_input = self.query_one("#password-input", Input)
         error_lbl = self.query_one("#error-label", Static)
-
-        password = pwd_input.value
-        if not password:
-            error_lbl.update("[red]Password is required.[/red]")
-            return
-
-        ok, msg = authenticate(password)
-        if not ok:
-            error_lbl.update(f"[red]{msg}[/red]")
-            pwd_input.value = ""
-            pwd_input.focus()
-            return
-
-        ok, msg = delete_entry(self._entry)
-        if not ok:
-            error_lbl.update(f"[red]{msg}[/red]")
-            return
-
-        self.dismiss(self._entry)
+        deleted: list[GameEntry] = []
+        errors: list[str] = []
+        for entry in self._entries:
+            ok, msg = delete_entry(entry)
+            if ok:
+                deleted.append(entry)
+            else:
+                errors.append(f"{entry.name}: {msg}")
+        if errors:
+            error_lbl.update("[red]" + "  ·  ".join(errors) + "[/red]")
+        if deleted:
+            self.dismiss(deleted)

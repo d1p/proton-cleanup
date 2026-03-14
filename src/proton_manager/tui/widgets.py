@@ -65,11 +65,34 @@ _KIND_COLOUR: dict[GameKind, str | None] = {
 class GameTable(DataTable):
     """Sortable DataTable pre-configured with Proton Cleanup columns."""
 
-    TOOLTIP = "↑ ↓  navigate   ·   d  delete   ·   /  search   ·   s  sort   ·   ?  help"
+    TOOLTIP = (
+        "\u2191 \u2193  navigate   \u00b7   space  select   \u00b7   d  delete"
+        "   \u00b7   /  search   \u00b7   s  sort   \u00b7   ?  help"
+    )
 
     # Index of the column currently used for sort, -1 = unsorted
     _sort_col: reactive[int] = reactive(-1)
     _sort_asc: reactive[bool] = reactive(True)
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._selected: set[str] = set()
+
+    @property
+    def selected_keys(self) -> frozenset[str]:
+        """Return the set of currently selected row keys."""
+        return frozenset(self._selected)
+
+    def toggle_selection(self, key: str) -> None:
+        """Toggle selection state for a row key."""
+        if key in self._selected:
+            self._selected.discard(key)
+        else:
+            self._selected.add(key)
+
+    def clear_selection(self) -> None:
+        """Clear all row selections."""
+        self._selected.clear()
 
     def populate(self, entries: list[GameEntry]) -> None:
         """Clear and re-fill the table from *entries*."""
@@ -102,7 +125,10 @@ class GameTable(DataTable):
             ssym = _STATUS_SYMBOL.get(status, "")
             coloured[7] = f"[{_STATUS_COLOUR.get(status, '')}]{ssym} {status}[/]"
 
-            self.add_row(*coloured, key=entry.app_id + entry.kind.value)
+            row_key = entry.app_id + entry.kind.value
+            sel_mark = "[bold]\u2611 [/bold]" if row_key in self._selected else "[dim]\u2610 [/dim]"
+            coloured[0] = sel_mark + coloured[0]
+            self.add_row(*coloured, key=row_key)
 
     def cycle_sort(self) -> None:
         """Advance sort to the next column (wraps around, then clears)."""
