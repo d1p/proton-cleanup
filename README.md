@@ -193,11 +193,12 @@ You do not need a mouse.  Every action is a single key press.
 | Key | What it does |
 |---|---|
 | **↑ / ↓** | Move the selection up or down one row |
+| **Space** | Toggle selection on the highlighted row (for multi-select deletion) |
 | **/** | Open the search bar — start typing a game name to filter |
 | **Escape** | Close the search bar (and clear it) · also closes any open dialog |
 | **s** | Cycle sort: press once to sort ascending, again for descending, again for the next column |
 | **o** | Toggle the display of orphaned prefixes and unused tools on/off |
-| **d** | Open the delete confirmation dialog for the highlighted row |
+| **d** | Delete the highlighted row, or all selected rows if any are marked with Space |
 | **r** | Re-run the full scan (useful after installing or removing a game) |
 | **e** | Export the currently visible rows to `proton-cleanup-export.json` in the current folder |
 | **?** | Open the on-screen keyboard shortcut reference |
@@ -219,18 +220,25 @@ Proton Cleanup can permanently remove a Wine prefix or an unused Proton tool.
   still there (marked **UNUSED**)
 - You want to reset a broken game environment so it gets rebuilt fresh next launch
 
-**How to delete:**
+### Deleting a single entry
 
 1. Use **↑ / ↓** to highlight the row you want to remove
 2. Press **`d`**
-3. A confirmation dialog opens showing:
-   - Game name (if any)
-   - Full path that will be deleted
-   - When the directory was created
-   - When it was last modified / used
+3. A confirmation dialog opens showing the game name, full path, and timestamps
 4. Read the warning carefully — **this cannot be undone**
-5. Type your Linux account password and press **Enter** (or click **⚠ Delete**)
+5. Click **⚠ Delete** (or press **Enter**) to confirm
 6. The row disappears from the table and the directory is gone
+
+### Deleting multiple entries at once
+
+1. Navigate to a row and press **`Space`** to mark it — a `☑` appears in the Game column
+2. Move to other rows and press **`Space`** to mark them too
+3. Press **`d`** — the confirmation dialog lists all marked entries
+4. Click **⚠ Delete** to remove all of them in one go
+
+Marked rows show `☑`; unmarked rows show `☐`.  Pressing **`Space`** again on a marked
+row deselects it.  If no rows are marked when you press **`d`**, the highlighted row is
+used (single-entry behaviour).
 
 Press **Escape** or click **Cancel** to close the dialog without deleting anything.
 
@@ -405,9 +413,13 @@ No terminal interaction is needed, no interactive input is required.
 
 ```
 proton-cleanup/
-├── .github/workflows/             # CI and automated release
-│   ├── ci.yml
-│   └── release.yml
+├── .github/
+│   ├── agents/                        # GitHub Copilot custom agents
+│   │   ├── coder.agent.md             # Coding agent (project-aware)
+│   │   └── release-manager.agent.md  # Release manager agent
+│   └── workflows/                     # CI and automated release
+│       ├── ci.yml
+│       └── release.yml
 ├── LICENSE
 ├── Makefile
 ├── README.md
@@ -458,7 +470,7 @@ make help      # Show all available targets
 ```bash
 make test
 # or directly:
-pytest -q          # run all 71 tests
+pytest -q          # run all 69 tests
 pytest -v          # verbose output
 pytest tests/test_delete_dialog.py   # one module only
 ```
@@ -481,7 +493,7 @@ flatpak --user install --bundle -y dist/proton-cleanup.flatpak
 
 | Package | Purpose |
 |---|---|
-| `textual >= 0.70.0` | Full-screen TUI framework (widgets, CSS, themes) |
+| `textual >= 0.82.0` | Full-screen TUI framework (widgets, CSS, themes) |
 | `vdf >= 3.4` | Parse Valve Data Format (`.acf`, `config.vdf`, `shortcuts.vdf`) |
 | `pytest` + `pytest-asyncio` | Testing (dev only) |
 
@@ -504,9 +516,10 @@ flatpak --user install --bundle -y dist/proton-cleanup.flatpak
 3. Commit, tag, and push:
 
 ```bash
-git commit -am "Release v0.2.0"
-git tag v0.2.0
-git push origin main --tags
+git commit -am "release: bump version to X.Y.Z"
+git tag vX.Y.Z
+git push origin main
+git push origin vX.Y.Z
 ```
 
 The [release workflow](.github/workflows/release.yml) will automatically:
@@ -514,3 +527,6 @@ The [release workflow](.github/workflows/release.yml) will automatically:
 - Run the test suite
 - Build a Flatpak bundle in CI
 - Create a GitHub Release with the `.flatpak` bundle attached
+
+> **Tip:** Use the `@release-manager` Copilot agent in VS Code — it knows the full
+> checklist and can run each step for you.
