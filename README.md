@@ -13,18 +13,19 @@ prefixes, then shows everything in an interactive table you can search, sort, an
 
 1. [What is Proton?](#what-is-proton)
 2. [What does this tool do?](#what-does-this-tool-do)
-3. [Installation](#installation)
-4. [Flatpak package (no Python setup)](#flatpak-package-no-python-setup)
-5. [Launching the app](#launching-the-app)
-6. [Understanding the table](#understanding-the-table)
-7. [Using the TUI (keyboard guide)](#using-the-tui-keyboard-guide)
-8. [Deleting an environment](#deleting-an-environment)
-9. [Command-line flags](#command-line-flags)
-10. [JSON output for scripting](#json-output-for-scripting)
-11. [Confidence levels explained](#confidence-levels-explained)
-12. [Row types explained](#row-types-explained)
-13. [Frequently asked questions](#frequently-asked-questions)
-14. [For developers](#for-developers)
+3. [Quick Start: Download Pre-built Releases](#quick-start-download-pre-built-releases)
+4. [Installation](#installation)
+5. [Flatpak package (no Python setup)](#flatpak-package-no-python-setup)
+6. [Launching the app](#launching-the-app)
+7. [Understanding the table](#understanding-the-table)
+8. [Using the TUI (keyboard guide)](#using-the-tui-keyboard-guide)
+9. [Deleting an environment](#deleting-an-environment)
+10. [Command-line flags](#command-line-flags)
+11. [JSON output for scripting](#json-output-for-scripting)
+12. [Confidence levels explained](#confidence-levels-explained)
+13. [Row types explained](#row-types-explained)
+14. [Frequently asked questions](#frequently-asked-questions)
+15. [For developers](#for-developers)
 
 ---
 
@@ -70,6 +71,26 @@ environment:
 Results are shown in an interactive full-screen table.  You can search, sort, filter
 by type, and delete entries you no longer need — all without opening a file manager or
 running manual `rm` commands.
+
+---
+
+## Quick Start: Download Pre-built Releases
+
+**For most users: Download the ready-to-use Flatpak bundle** — no Python or command line needed.
+
+### Option 1: Download from GitHub Releases (Easiest)
+
+1. Visit the [Releases page](https://github.com/d1p/proton-cleanup/releases)
+2. Find the latest release (top of the list)
+3. Scroll down to **Assets** and download `proton-cleanup.flatpak`
+4. Open your file manager and double-click the `.flatpak` file to install
+5. Launch from your application menu — no terminal required
+
+That's it! The app is ready to use.
+
+### Option 2: Build from Source
+
+If you prefer installing from the repository or need to customize the build, follow the [Installation](#installation) section below.
 
 ---
 
