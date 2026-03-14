@@ -12,7 +12,9 @@ modules:
   - name: proton-cleanup
     buildsystem: simple
     build-commands:
-      - python3 -m pip install --prefix=/app .
+      - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels hatchling==1.27.0
+      - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels textual==0.70.0 vdf==3.4
+      - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels --no-build-isolation --no-deps .
       - install -Dm644 data/io.github.protoncleanup.ProtonCleanup.desktop /app/share/applications/io.github.protoncleanup.ProtonCleanup.desktop
       - install -Dm644 data/io.github.protoncleanup.ProtonCleanup.metainfo.xml /app/share/metainfo/io.github.protoncleanup.ProtonCleanup.metainfo.xml
       - install -Dm644 data/icons/io.github.protoncleanup.ProtonCleanup.png /app/share/icons/hicolor/512x512/apps/io.github.protoncleanup.ProtonCleanup.png
