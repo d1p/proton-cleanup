@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.protoncleanup.ProtonCleanup</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Proton Cleanup</name>
+  <summary>Scan and clean up Steam Proton environments</summary>
+  <description>
+    <p>
+      Proton Cleanup inspects Steam Proton prefixes, shortcut mappings, and compatibility tools,
+      helping users identify orphans, unused tools, and mismatches.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.protoncleanup.ProtonCleanup.desktop</launchable>
+</component>

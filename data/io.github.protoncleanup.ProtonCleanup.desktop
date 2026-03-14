@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Proton Cleanup
+Comment=Scan and clean up Steam Proton environments
+Exec=proton-cleanup
+Icon=io.github.protoncleanup.ProtonCleanup
+Terminal=true
+Categories=Utility;System;
+Keywords=Steam;Proton;Cleanup;Compatdata;
