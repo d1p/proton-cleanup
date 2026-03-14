@@ -15,6 +15,11 @@
   <url type="homepage">https://github.com/d1p/proton-cleanup</url>
   <url type="bugtracker">https://github.com/d1p/proton-cleanup/issues</url>
   <releases>
+    <release version="0.2.5" date="2026-03-14">
+      <description>
+        <p>Fix crash on launch: update vendored Textual to 8.1.1 which includes textual.theme.</p>
+      </description>
+    </release>
     <release version="0.2.4" date="2026-03-14">
       <description>
         <p>Refine logo sizing.</p>
