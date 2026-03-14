@@ -19,6 +19,11 @@
   <url type="bugtracker">https://github.com/d1p/proton-cleanup/issues</url>
   <url type="contribute">https://github.com/d1p/proton-cleanup/pulls</url>
   <releases>
+    <release version="0.2.7" date="2026-03-14">
+      <description>
+        <p>Fix Flatpak build: update manifest to install textual 8.1.1 and platformdirs.</p>
+      </description>
+    </release>
     <release version="0.2.6" date="2026-03-14">
       <description>
         <p>Add author information to AppStream metainfo and package metadata.</p>
