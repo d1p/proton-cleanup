@@ -1,10 +1,12 @@
 """Tests for the delete confirmation dialog and associated helpers."""
+
 from __future__ import annotations
 
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from textual.widgets import DataTable, Input, Static
 
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.tui.app import ProtonManagerApp
@@ -14,12 +16,11 @@ from proton_manager.tui.delete_dialog import (
     deleteable_path,
     entry_timestamps,
 )
-from textual.widgets import DataTable, Input, Static
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 def _make_entry(
     kind: GameKind = GameKind.ORPHAN,
@@ -61,11 +62,12 @@ def _steam_entry(tmp_path: Path, app_id: str = "100") -> GameEntry:
 # deleteable_path
 # ---------------------------------------------------------------------------
 
+
 def test_deleteable_path_pfx_subdir(tmp_path):
     pfx = tmp_path / "compatdata" / "1234" / "pfx"
     pfx.mkdir(parents=True)
     entry = _make_entry(GameKind.STEAM, pfx)
-    assert deleteable_path(entry) == pfx.parent   # compatdata/1234
+    assert deleteable_path(entry) == pfx.parent  # compatdata/1234
 
 
 def test_deleteable_path_orphan_no_pfx(tmp_path):
@@ -90,6 +92,7 @@ def test_deleteable_path_none():
 # ---------------------------------------------------------------------------
 # entry_timestamps
 # ---------------------------------------------------------------------------
+
 
 def test_entry_timestamps_no_path():
     entry = _make_entry(prefix=None)
@@ -118,6 +121,7 @@ def test_entry_timestamps_returns_strings(tmp_path):
 # ---------------------------------------------------------------------------
 # delete_entry – unit tests (no filesystem required for some)
 # ---------------------------------------------------------------------------
+
 
 def test_delete_entry_removes_directory(tmp_path):
     compat = tmp_path / "compatdata" / "9999"
@@ -180,6 +184,7 @@ def test_delete_entry_refuses_symlink(tmp_path):
 # ---------------------------------------------------------------------------
 # DeleteConfirmScreen — dialog smoke tests
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_dialog_composes_shows_table(tmp_path):
@@ -259,11 +264,10 @@ async def test_dialog_wrong_password_shows_error(tmp_path):
 async def test_dialog_correct_password_dismisses_with_entry(tmp_path):
     entry = _steam_entry(tmp_path)
     dismissed: list = []
-    with patch(
-        "proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")
-    ), patch(
-        "proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")
-    ) as mock_del:
+    with (
+        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
+        patch("proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")) as mock_del,
+    ):
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:
             app.push_screen(DeleteConfirmScreen(entry), dismissed.append)
@@ -280,11 +284,12 @@ async def test_dialog_delete_failure_shows_error(tmp_path):
     """delete_entry returning an error should keep the dialog open."""
     entry = _steam_entry(tmp_path)
     dismissed: list = []
-    with patch(
-        "proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")
-    ), patch(
-        "proton_manager.tui.delete_dialog.delete_entry",
-        return_value=(False, "Permission denied: /some/path"),
+    with (
+        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
+        patch(
+            "proton_manager.tui.delete_dialog.delete_entry",
+            return_value=(False, "Permission denied: /some/path"),
+        ),
     ):
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:
@@ -302,6 +307,7 @@ async def test_dialog_delete_failure_shows_error(tmp_path):
 # App-level integration: pressing 'd' opens dialog; confirm removes entry
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_app_delete_action_removes_entry(tmp_path):
     compat = tmp_path / "compatdata" / "9999"
@@ -318,10 +324,10 @@ async def test_app_delete_action_removes_entry(tmp_path):
         confidence=Confidence.UNKNOWN,
     )
     from proton_manager.tui.widgets import GameTable
-    with patch(
-        "proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")
-    ), patch(
-        "proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")
+
+    with (
+        patch("proton_manager.tui.delete_dialog.authenticate", return_value=(True, "")),
+        patch("proton_manager.tui.delete_dialog.delete_entry", return_value=(True, "")),
     ):
         app = ProtonManagerApp(entries=[entry])
         async with app.run_test(size=(120, 40)) as pilot:

@@ -1,4 +1,5 @@
 """Auto-detect Steam root directories for native and Flatpak installs."""
+
 from __future__ import annotations
 
 import os

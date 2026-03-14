@@ -1,22 +1,23 @@
 """JSON serialisation and table-row adapters shared by CLI and TUI."""
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
 from typing import Any
 
-from proton_manager.model import Confidence, GameEntry, GameKind
+from proton_manager.model import GameEntry, GameKind
 
 # Ordered column headers for the table
 COLUMNS: list[tuple[str, int]] = [
-    ("Game",        30),
-    ("Kind",        14),
-    ("App ID",      12),
-    ("Tool",        22),
-    ("Version",     14),
-    ("Prefix",      40),
-    ("Confidence",  10),
-    ("Status",      10),
+    ("Game", 30),
+    ("Kind", 14),
+    ("App ID", 12),
+    ("Tool", 22),
+    ("Version", 14),
+    ("Prefix", 40),
+    ("Confidence", 10),
+    ("Status", 10),
 ]
 
 
@@ -60,6 +61,7 @@ def _status(entry: GameEntry) -> str:
 # ---------------------------------------------------------------------------
 # JSON
 # ---------------------------------------------------------------------------
+
 
 def entries_to_json(entries: list[GameEntry], *, indent: int = 2) -> str:
     return json.dumps([_entry_to_dict(e) for e in entries], indent=indent)

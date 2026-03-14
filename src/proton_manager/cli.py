@@ -1,4 +1,5 @@
 """CLI entry point for Proton Cleanup."""
+
 from __future__ import annotations
 
 import argparse
@@ -62,13 +63,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _run_scan(steam_root_override: Path | None) -> tuple[list, list[str]]:
     """Execute the full scan pipeline and return (entries, global_warnings)."""
-    from proton_manager.scan.steam_roots import discover_steam_roots
-    from proton_manager.scan.libraries import enumerate_library_paths
-    from proton_manager.scan.proton_tools import discover_proton_tools
     from proton_manager.scan.config import load_compat_tool_mapping
-    from proton_manager.scan.steam_games import scan_steam_games
-    from proton_manager.scan.shortcuts import scan_shortcuts
+    from proton_manager.scan.libraries import enumerate_library_paths
     from proton_manager.scan.orphans import scan_orphans
+    from proton_manager.scan.proton_tools import discover_proton_tools
+    from proton_manager.scan.shortcuts import scan_shortcuts
+    from proton_manager.scan.steam_games import scan_steam_games
+    from proton_manager.scan.steam_roots import discover_steam_roots
 
     global_warnings: list[str] = []
 
@@ -131,15 +132,19 @@ def main() -> None:
     filtered = entries
     if args.only_steam:
         from proton_manager.model import GameKind
+
         filtered = [e for e in filtered if e.kind == GameKind.STEAM]
     if args.only_shortcuts:
         from proton_manager.model import GameKind
+
         filtered = [e for e in filtered if e.kind == GameKind.SHORTCUT]
     if args.hide_orphans:
         from proton_manager.model import GameKind
+
         filtered = [e for e in filtered if e.kind not in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)]
     if args.min_confidence:
         from proton_manager.model import Confidence
+
         order = [Confidence.HIGH, Confidence.MEDIUM, Confidence.LOW, Confidence.UNKNOWN]
         threshold = order.index(Confidence(args.min_confidence))
         filtered = [e for e in filtered if order.index(e.confidence) <= threshold]
@@ -150,6 +155,7 @@ def main() -> None:
 
     if args.json:
         from proton_manager.output import entries_to_json
+
         print(entries_to_json(filtered))
         return
 

@@ -1,4 +1,5 @@
 """Parse appmanifest_*.acf files and map Steam games to Proton environments."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -35,6 +36,7 @@ def scan_steam_games(
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _parse_manifest(
     manifest_path: Path,
@@ -112,6 +114,7 @@ def _parse_manifest(
             ci_str = ci_text.decode("utf-8", errors="replace")
             # Look for a path fragment ending in 'Proton X.Y' or 'GE-ProtonX-Y'
             import re as _re
+
             m = _re.search(
                 r"steamapps/common/((?:Proton|GE-Proton)[^\n/]+?)(?:/|\n)",
                 ci_str,
@@ -131,7 +134,9 @@ def _parse_manifest(
         tool_name = config_info_tool
 
     # --- Resolve tool name to an installed tool ---
-    resolved_tool, tool_installed = _resolve_tool(tool_name, proton_version, proton_tools, evidence, warnings)
+    resolved_tool, tool_installed = _resolve_tool(
+        tool_name, proton_version, proton_tools, evidence, warnings
+    )
 
     confidence = _compute_confidence(
         has_explicit_tool=bool(tool_name),

@@ -1,4 +1,5 @@
 """Delete confirmation modal screen for Proton environments."""
+
 from __future__ import annotations
 
 import shutil
@@ -14,10 +15,10 @@ from textual.widgets import Button, DataTable, Input, Label, Static
 
 from proton_manager.model import GameEntry, GameKind
 
-
 # ---------------------------------------------------------------------------
 # Path helpers
 # ---------------------------------------------------------------------------
+
 
 def deleteable_path(entry: GameEntry) -> Path | None:
     """Return the directory that will be deleted for *entry*.
@@ -41,6 +42,7 @@ def deleteable_path(entry: GameEntry) -> Path | None:
 # ---------------------------------------------------------------------------
 # Timestamp helpers
 # ---------------------------------------------------------------------------
+
 
 def _fmt_ts(ts: float) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d  %H:%M")
@@ -75,6 +77,7 @@ def entry_timestamps(entry: GameEntry) -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 # Authentication
 # ---------------------------------------------------------------------------
+
 
 def authenticate(password: str) -> tuple[bool, str]:
     """Verify *password* against the current unix account via ``sudo``.
@@ -152,16 +155,16 @@ def delete_entry(entry: GameEntry) -> tuple[bool, str]:
 # ---------------------------------------------------------------------------
 
 _KIND_TITLE: dict[GameKind, str] = {
-    GameKind.STEAM:       "◆  Delete Proton Prefix  —  Steam Game",
-    GameKind.SHORTCUT:    "◇  Delete Proton Prefix  —  Non-Steam Game",
-    GameKind.ORPHAN:      "◌  Delete Orphaned Prefix",
+    GameKind.STEAM: "◆  Delete Proton Prefix  —  Steam Game",
+    GameKind.SHORTCUT: "◇  Delete Proton Prefix  —  Non-Steam Game",
+    GameKind.ORPHAN: "◌  Delete Orphaned Prefix",
     GameKind.UNUSED_TOOL: "⚙  Delete Unused Proton Tool",
 }
 
 _KIND_OBJECT: dict[GameKind, str] = {
-    GameKind.STEAM:      "Proton prefix directory",
-    GameKind.SHORTCUT:   "Proton prefix directory",
-    GameKind.ORPHAN:     "orphaned prefix directory",
+    GameKind.STEAM: "Proton prefix directory",
+    GameKind.SHORTCUT: "Proton prefix directory",
+    GameKind.ORPHAN: "orphaned prefix directory",
     GameKind.UNUSED_TOOL: "Proton tool directory",
 }
 
@@ -265,9 +268,7 @@ class DeleteConfirmScreen(ModalScreen[GameEntry | None]):
                 id="warn-text",
             )
             with Vertical(id="password-section"):
-                yield Label(
-                    "Enter your account password to confirm:", id="password-label"
-                )
+                yield Label("Enter your account password to confirm:", id="password-label")
                 yield Input(
                     placeholder="Password",
                     password=True,

@@ -1,22 +1,19 @@
 """Tests for orphaned prefix and unused tool detection."""
+
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.scan.orphans import scan_orphans
 from proton_manager.scan.proton_tools import discover_proton_tools
 from proton_manager.scan.steam_games import scan_steam_games
-from proton_manager.scan.libraries import enumerate_library_paths
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _steam_entry(app_id: str) -> GameEntry:
     return GameEntry(
@@ -35,6 +32,7 @@ def _steam_entry(app_id: str) -> GameEntry:
 # ---------------------------------------------------------------------------
 # Orphaned prefix detection
 # ---------------------------------------------------------------------------
+
 
 def test_orphaned_prefix_detected(tmp_path):
     steamapps = tmp_path / "steamapps"
@@ -89,10 +87,7 @@ def test_orphan_config_info_inference(tmp_path):
     steamapps = tmp_path / "steamapps"
     compat = steamapps / "compatdata" / "5555"
     (compat / "pfx" / "drive_c").mkdir(parents=True)
-    ci = (
-        b"9.0-1\n"
-        b"/home/deck/.local/share/Steam/steamapps/common/Proton 9.0/files/share/fonts/\n"
-    )
+    ci = b"9.0-1\n/home/deck/.local/share/Steam/steamapps/common/Proton 9.0/files/share/fonts/\n"
     (compat / "config_info").write_bytes(ci)
 
     results = scan_orphans([steamapps], [], {})
@@ -104,11 +99,13 @@ def test_orphan_config_info_inference(tmp_path):
 # Unused tool detection
 # ---------------------------------------------------------------------------
 
+
 def test_unused_tool_detected(tmp_path):
     from proton_manager.model import ProtonTool
+
     tools = {
         "GE-Proton10-25": ProtonTool("GE-Proton10-25", "10.25", tmp_path / "tool1"),
-        "UnusedTool":     ProtonTool("UnusedTool", "1.0",   tmp_path / "tool2"),
+        "UnusedTool": ProtonTool("UnusedTool", "1.0", tmp_path / "tool2"),
     }
     # Make tool directories exist
     (tmp_path / "tool1").mkdir()
@@ -116,9 +113,14 @@ def test_unused_tool_detected(tmp_path):
 
     known = [
         GameEntry(
-            app_id="100", name="My Game", kind=GameKind.STEAM,
-            proton_tool="GE-Proton10-25", proton_version=None,
-            prefix_path=None, prefix_exists=False, tool_installed=True,
+            app_id="100",
+            name="My Game",
+            kind=GameKind.STEAM,
+            proton_tool="GE-Proton10-25",
+            proton_version=None,
+            prefix_path=None,
+            prefix_exists=False,
+            tool_installed=True,
             confidence=Confidence.HIGH,
         )
     ]
@@ -132,13 +134,19 @@ def test_unused_tool_detected(tmp_path):
 
 def test_all_tools_used_no_unused(tmp_path):
     from proton_manager.model import ProtonTool
+
     tools = {"GE-Proton10-25": ProtonTool("GE-Proton10-25", "10.25", tmp_path / "t")}
     (tmp_path / "t").mkdir()
     known = [
         GameEntry(
-            app_id="1", name="G", kind=GameKind.STEAM,
-            proton_tool="GE-Proton10-25", proton_version=None,
-            prefix_path=None, prefix_exists=False, tool_installed=True,
+            app_id="1",
+            name="G",
+            kind=GameKind.STEAM,
+            proton_tool="GE-Proton10-25",
+            proton_version=None,
+            prefix_path=None,
+            prefix_exists=False,
+            tool_installed=True,
             confidence=Confidence.HIGH,
         )
     ]
@@ -155,6 +163,7 @@ def test_no_tools_no_unused():
 # Full pipeline integration (fixture-based)
 # ---------------------------------------------------------------------------
 
+
 def test_full_scan_includes_orphans(steam_root):
     """End-to-end: the steam_root fixture has no orphans, but adding one surfaces it."""
     steamapps = steam_root / "steamapps"
@@ -165,8 +174,9 @@ def test_full_scan_includes_orphans(steam_root):
     tools = discover_proton_tools(steam_root)
     known = scan_steam_games(steamapps, tools)
 
-    from proton_manager.scan.shortcuts import scan_shortcuts
     from proton_manager.scan.config import load_compat_tool_mapping
+    from proton_manager.scan.shortcuts import scan_shortcuts
+
     mapping = load_compat_tool_mapping(steam_root)
     known += scan_shortcuts(steam_root, [steamapps], tools, mapping)
 
@@ -179,6 +189,7 @@ def test_full_scan_includes_orphans(steam_root):
 # CLI --hide-orphans flag
 # ---------------------------------------------------------------------------
 
+
 def test_cli_json_includes_orphans_by_default(steam_root, capsys):
     # Add orphan prefix
     orphan_dir = steam_root / "steamapps" / "compatdata" / "77777" / "pfx" / "drive_c"
@@ -186,6 +197,7 @@ def test_cli_json_includes_orphans_by_default(steam_root, capsys):
 
     with patch("sys.argv", ["proton-manager", "--json", f"--steam-root={steam_root}"]):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)
@@ -202,6 +214,7 @@ def test_cli_json_hide_orphans(steam_root, capsys):
         ["proton-manager", "--json", "--hide-orphans", f"--steam-root={steam_root}"],
     ):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)

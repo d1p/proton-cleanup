@@ -1,14 +1,15 @@
 """Textual TUI smoke tests: compose, populate, navigation, filter."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
+from textual.widgets import Input
 
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.tui.app import ProtonManagerApp
 from proton_manager.tui.widgets import DetailPane, GameTable, StatusBar
-from textual.widgets import Input
 
 
 def _sample_entries() -> list[GameEntry]:
@@ -59,7 +60,7 @@ def _sample_entries() -> list[GameEntry]:
 async def test_app_composes_without_error():
     """App should compose and mount without raising."""
     app = ProtonManagerApp(entries=_sample_entries())
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         # Table should be rendered with rows
         table = app.query_one(GameTable)
         assert table.row_count == 3
@@ -68,7 +69,7 @@ async def test_app_composes_without_error():
 @pytest.mark.asyncio
 async def test_status_bar_shows_counts():
     app = ProtonManagerApp(entries=_sample_entries())
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         status = app.query_one(StatusBar)
         assert "3" in str(status.content)
 
@@ -110,7 +111,7 @@ async def test_escape_clears_filter():
 @pytest.mark.asyncio
 async def test_only_steam_filter():
     app = ProtonManagerApp(entries=_sample_entries(), only_steam=True)
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         table = app.query_one(GameTable)
         assert table.row_count == 2  # Alpha + Gamma
 
@@ -118,7 +119,7 @@ async def test_only_steam_filter():
 @pytest.mark.asyncio
 async def test_only_shortcuts_filter():
     app = ProtonManagerApp(entries=_sample_entries(), only_shortcuts=True)
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         table = app.query_one(GameTable)
         assert table.row_count == 1  # Beta only
 
@@ -126,7 +127,7 @@ async def test_only_shortcuts_filter():
 @pytest.mark.asyncio
 async def test_min_confidence_high():
     app = ProtonManagerApp(entries=_sample_entries(), min_confidence=Confidence.HIGH)
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         table = app.query_one(GameTable)
         assert table.row_count == 1  # only Alpha (HIGH)
 
@@ -148,6 +149,6 @@ async def test_detail_pane_updates_on_navigation():
 async def test_empty_entries():
     """TUI with zero entries should not crash."""
     app = ProtonManagerApp(entries=[])
-    async with app.run_test(size=(120, 40)) as pilot:
+    async with app.run_test(size=(120, 40)):
         table = app.query_one(GameTable)
         assert table.row_count == 0

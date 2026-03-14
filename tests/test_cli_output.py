@@ -1,21 +1,20 @@
 """Smoke tests for the JSON CLI output mode."""
+
 from __future__ import annotations
 
 import json
-import sys
-from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from proton_manager.model import Confidence, GameEntry, GameKind
-from proton_manager.output import entries_to_json, entry_to_row, COLUMNS
-
+from proton_manager.output import COLUMNS, entries_to_json, entry_to_row
 
 # ---------------------------------------------------------------------------
 # output.py unit tests
 # ---------------------------------------------------------------------------
+
 
 def _make_entry(**kwargs) -> GameEntry:
     defaults = dict(
@@ -85,9 +84,17 @@ def test_entries_to_json_schema():
     data = json.loads(entries_to_json([e]))
     row = data[0]
     required_keys = {
-        "app_id", "name", "kind", "proton_tool", "proton_version",
-        "prefix_path", "prefix_exists", "tool_installed",
-        "confidence", "evidence", "warnings",
+        "app_id",
+        "name",
+        "kind",
+        "proton_tool",
+        "proton_version",
+        "prefix_path",
+        "prefix_exists",
+        "tool_installed",
+        "confidence",
+        "evidence",
+        "warnings",
     }
     assert required_keys.issubset(row.keys())
 
@@ -101,10 +108,12 @@ def test_entries_to_json_empty():
 # cli.py --json mode (integration)
 # ---------------------------------------------------------------------------
 
+
 def test_cli_json_flag(steam_root, capsys):
     """--json should print valid JSON and exit 0."""
     with patch("sys.argv", ["proton-manager", "--json", f"--steam-root={steam_root}"]):
         from proton_manager.cli import main
+
         main()
 
     captured = capsys.readouterr()
@@ -120,6 +129,7 @@ def test_cli_json_only_steam(steam_root, capsys):
         ["proton-manager", "--json", "--only-steam", f"--steam-root={steam_root}"],
     ):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)
@@ -132,6 +142,7 @@ def test_cli_json_only_shortcuts(steam_root, capsys):
         ["proton-manager", "--json", "--only-shortcuts", f"--steam-root={steam_root}"],
     ):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)
@@ -142,12 +153,15 @@ def test_cli_json_min_confidence(steam_root, capsys):
     with patch(
         "sys.argv",
         [
-            "proton-manager", "--json",
-            "--min-confidence", "HIGH",
+            "proton-manager",
+            "--json",
+            "--min-confidence",
+            "HIGH",
             f"--steam-root={steam_root}",
         ],
     ):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)
@@ -159,6 +173,7 @@ def test_cli_missing_steam_root(tmp_path):
     bad_path = tmp_path / "does_not_exist"
     with patch("sys.argv", ["proton-manager", "--json", f"--steam-root={bad_path}"]):
         from proton_manager.cli import main
+
         with pytest.raises(SystemExit) as exc_info:
             main()
         assert exc_info.value.code != 0
@@ -178,6 +193,7 @@ def test_cli_no_steam_install(tmp_path, capsys):
         ["proton-manager", "--json", "--hide-orphans", f"--steam-root={empty_root}"],
     ):
         from proton_manager.cli import main
+
         main()
 
     data = json.loads(capsys.readouterr().out)

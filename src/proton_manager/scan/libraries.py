@@ -1,4 +1,5 @@
 """Parse libraryfolders.vdf and enumerate game manifests across all Steam libraries."""
+
 from __future__ import annotations
 
 from pathlib import Path

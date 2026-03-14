@@ -1,4 +1,5 @@
 """Pytest fixtures: synthetic Steam directory trees for scan tests."""
+
 from __future__ import annotations
 
 import struct
@@ -6,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers for building fake VDF content
 # ---------------------------------------------------------------------------
+
 
 def make_acf(app_id: int, name: str, compat_tool: str | None = None) -> str:
     compat_section = ""
@@ -20,9 +21,7 @@ def make_acf(app_id: int, name: str, compat_tool: str | None = None) -> str:
         "{\n"
         f'\t"appid"\t\t"{app_id}"\n'
         f'\t"name"\t\t"{name}"\n'
-        f'\t"StateFlags"\t\t"4"\n'
-        + compat_section +
-        "}\n"
+        f'\t"StateFlags"\t\t"4"\n' + compat_section + "}\n"
     )
 
 
@@ -35,15 +34,7 @@ def make_libraryfolders(extra_paths: list[Path]) -> str:
 
 
 def make_compatibilitytool_vdf(name: str) -> str:
-    return (
-        '"compatibilitytools"\n'
-        "{\n"
-        f'\t"{name}"\n'
-        "\t{\n"
-        '\t\t"install_path"\t\t"."\n'
-        "\t}\n"
-        "}\n"
-    )
+    return f'"compatibilitytools"\n{{\n\t"{name}"\n\t{{\n\t\t"install_path"\t\t"."\n\t}}\n}}\n'
 
 
 def make_binary_shortcuts_vdf(shortcuts: list[dict]) -> bytes:
@@ -90,6 +81,7 @@ def make_binary_shortcuts_vdf(shortcuts: list[dict]) -> bytes:
 # Fixtures: native Steam root tree
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def steam_root(tmp_path: Path) -> Path:
     """A minimal native Steam root with one game, one Proton tool, one shortcut."""
@@ -117,22 +109,22 @@ def steam_root(tmp_path: Path) -> Path:
     )
 
     # libraryfolders.vdf (primary only, no extra)
-    (steamapps / "libraryfolders.vdf").write_text(
-        '"libraryfolders"\n{\n}\n', encoding="utf-8"
-    )
+    (steamapps / "libraryfolders.vdf").write_text('"libraryfolders"\n{\n}\n', encoding="utf-8")
 
     # Non-Steam shortcut
     user_dir = root / "userdata" / "99999" / "config"
     user_dir.mkdir(parents=True)
 
-    sc_data = make_binary_shortcuts_vdf([
-        {
-            "appid": 2147483649,  # 0x80000001
-            "appname": "My External Game",
-            "exe": "/home/deck/games/mygame",
-            "compattool": "Proton-8-Test",
-        }
-    ])
+    sc_data = make_binary_shortcuts_vdf(
+        [
+            {
+                "appid": 2147483649,  # 0x80000001
+                "appname": "My External Game",
+                "exe": "/home/deck/games/mygame",
+                "compattool": "Proton-8-Test",
+            }
+        ]
+    )
     (user_dir / "shortcuts.vdf").write_bytes(sc_data)
 
     # compatdata for the shortcut

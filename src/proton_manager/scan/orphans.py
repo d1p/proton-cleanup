@@ -9,6 +9,7 @@ Two categories are detected:
 * **Unused tool** — a Proton compatibility tool installed under
   ``compatibilitytools.d/`` that is referenced by no known game entry.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -42,6 +43,7 @@ def scan_orphans(
 # ---------------------------------------------------------------------------
 # Orphaned prefixes
 # ---------------------------------------------------------------------------
+
 
 def _orphaned_prefixes(
     steamapps_paths: list[Path],
@@ -95,6 +97,7 @@ def _orphaned_prefixes(
             if config_info.exists():
                 try:
                     import re as _re
+
                     ci_str = config_info.read_bytes().decode("utf-8", errors="replace")
                     m = _re.search(
                         r"steamapps/common/((?:Proton|GE-Proton)[^\n/]+?)(?:/|\n)",
@@ -129,6 +132,7 @@ def _orphaned_prefixes(
 # Unused tools
 # ---------------------------------------------------------------------------
 
+
 def _unused_tools(
     proton_tools: dict[str, ProtonTool],
     known_entries: list[GameEntry],
@@ -145,8 +149,7 @@ def _unused_tools(
             continue
         # Also skip partial fuzzy matches already covered
         if any(
-            tool_name.lower() in ut.lower() or ut.lower() in tool_name.lower()
-            for ut in used_tools
+            tool_name.lower() in ut.lower() or ut.lower() in tool_name.lower() for ut in used_tools
         ):
             continue
 

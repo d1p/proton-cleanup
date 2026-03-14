@@ -1,21 +1,20 @@
 """Tests for the scan layer: roots, libraries, tools, Steam games, shortcuts."""
-from __future__ import annotations
 
-from pathlib import Path
+from __future__ import annotations
 
 import pytest
 
 from proton_manager.model import Confidence, GameKind
-from proton_manager.scan.libraries import enumerate_library_paths, collect_app_manifests
+from proton_manager.scan.libraries import collect_app_manifests, enumerate_library_paths
 from proton_manager.scan.proton_tools import discover_proton_tools
+from proton_manager.scan.shortcuts import _compute_shortcut_id, scan_shortcuts
 from proton_manager.scan.steam_games import scan_steam_games
-from proton_manager.scan.shortcuts import scan_shortcuts, _compute_shortcut_id
 from proton_manager.scan.steam_roots import discover_steam_roots
-
 
 # ---------------------------------------------------------------------------
 # steam_roots
 # ---------------------------------------------------------------------------
+
 
 def test_discover_override_valid(tmp_path):
     result = discover_steam_roots(override=tmp_path)
@@ -30,6 +29,7 @@ def test_discover_override_missing(tmp_path):
 # ---------------------------------------------------------------------------
 # libraries
 # ---------------------------------------------------------------------------
+
 
 def test_enumerate_library_paths_primary_only(steam_root):
     paths = enumerate_library_paths(steam_root)
@@ -62,6 +62,7 @@ def test_collect_app_manifests(steam_root):
 # proton_tools
 # ---------------------------------------------------------------------------
 
+
 def test_discover_proton_tools(steam_root):
     tools = discover_proton_tools(steam_root)
     assert "Proton-8-Test" in tools
@@ -83,6 +84,7 @@ def test_discover_proton_tools_no_tools_in_root(tmp_path):
 # ---------------------------------------------------------------------------
 # steam_games
 # ---------------------------------------------------------------------------
+
 
 def test_scan_steam_games_basic(steam_root):
     tools = discover_proton_tools(steam_root)
@@ -128,6 +130,7 @@ def test_scan_skips_native_games(tmp_path):
     steamapps.mkdir()
     # A game with no compatdata at all and no compat tool override → skip
     from tests.conftest import make_acf
+
     (steamapps / "appmanifest_777.acf").write_text(
         make_acf(777, "Native Game"),  # no compat_tool arg
         encoding="utf-8",
@@ -139,6 +142,7 @@ def test_scan_skips_native_games(tmp_path):
 # ---------------------------------------------------------------------------
 # shortcuts
 # ---------------------------------------------------------------------------
+
 
 def test_compute_shortcut_id_deterministic():
     id1 = _compute_shortcut_id("/usr/bin/game", "My Game")
@@ -183,6 +187,7 @@ def test_scan_shortcuts_corrupt_vdf(tmp_path):
 # Flatpak root scenario
 # ---------------------------------------------------------------------------
 
+
 def test_flatpak_root_scan(flatpak_steam_root):
     tools = discover_proton_tools(flatpak_steam_root)
     steamapps = enumerate_library_paths(flatpak_steam_root)
@@ -193,5 +198,5 @@ def test_flatpak_root_scan(flatpak_steam_root):
     assert len(entries) == 1
     e = entries[0]
     assert e.app_id == "5678"
-    assert e.prefix_exists is False           # pfx/ not created yet
+    assert e.prefix_exists is False  # pfx/ not created yet
     assert e.confidence in (Confidence.MEDIUM, Confidence.LOW, Confidence.HIGH)

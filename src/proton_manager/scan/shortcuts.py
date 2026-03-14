@@ -1,4 +1,5 @@
 """Parse binary shortcuts.vdf and map non-Steam games to Proton environments."""
+
 from __future__ import annotations
 
 import binascii
@@ -68,9 +69,7 @@ def scan_shortcuts(
         for idx, shortcut in shortcuts_map.items():
             if not isinstance(shortcut, dict):
                 continue
-            entry = _parse_shortcut(
-                shortcut, idx, known_ids, compat_roots, proton_tools, mapping
-            )
+            entry = _parse_shortcut(shortcut, idx, known_ids, compat_roots, proton_tools, mapping)
             if entry is not None:
                 entries.append(entry)
 
@@ -80,6 +79,7 @@ def scan_shortcuts(
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _key(d: dict, *names: str) -> object:
     """Case-insensitive multi-name key lookup on a dict."""

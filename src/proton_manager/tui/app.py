@@ -1,8 +1,9 @@
 """Main Textual application for Proton Cleanup."""
+
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from textual import on
 from textual.app import App, ComposeResult
@@ -15,23 +16,22 @@ from textual.widgets import DataTable, Footer, Header, Input, Label, Static
 from proton_manager.model import Confidence, GameEntry
 from proton_manager.tui.widgets import DetailPane, GameTable, StatusBar
 
-
 # ---------------------------------------------------------------------------
 # Steam-inspired dark theme
 # ---------------------------------------------------------------------------
 
 _STEAM_THEME = Theme(
     name="steam",
-    primary="#66c0f4",       # Steam light blue  — titles, headings, focus rings
-    secondary="#a4c2d8",     # muted slate blue  — secondary text
-    accent="#57cbde",        # cyan              — accents, icons
-    warning="#f0a500",       # amber             — warning indicators
-    error="#e74655",         # red               — errors, destructive actions
-    success="#5dc963",       # green             — success / OK state
-    background="#1b2838",    # Steam dark navy   — screen background
-    surface="#2a475e",       # Steam card blue   — detail pane, dialog surfaces
-    panel="#171a21",         # Steam sidebar     — filter bar, status bar, footer
-    boost="#3d566e",         # row hover         — subtle highlight
+    primary="#66c0f4",  # Steam light blue  — titles, headings, focus rings
+    secondary="#a4c2d8",  # muted slate blue  — secondary text
+    accent="#57cbde",  # cyan              — accents, icons
+    warning="#f0a500",  # amber             — warning indicators
+    error="#e74655",  # red               — errors, destructive actions
+    success="#5dc963",  # green             — success / OK state
+    background="#1b2838",  # Steam dark navy   — screen background
+    surface="#2a475e",  # Steam card blue   — detail pane, dialog surfaces
+    panel="#171a21",  # Steam sidebar     — filter bar, status bar, footer
+    boost="#3d566e",  # row hover         — subtle highlight
     dark=True,
 )
 
@@ -40,17 +40,17 @@ _STEAM_THEME = Theme(
 # ---------------------------------------------------------------------------
 
 _HELP_ENTRIES: list[tuple[str, str]] = [
-    ("↑ / ↓",   "Move selection up or down"),
-    ("/",        "Open inline name-search bar"),
-    ("Escape",   "Close search filter  ·  close any modal overlay"),
-    ("s",        "Cycle column sort  (ascending → descending → next column)"),
-    ("o",        "Toggle display of orphaned prefixes and unused tools"),
-    ("d",        "Delete the highlighted environment  (opens confirmation)"),
-    ("r",        "Re-run the full environment scan"),
-    ("e",        "Export currently-visible entries to JSON file"),
-    ("Tab",      "Move keyboard focus between widgets"),
-    ("q",        "Quit Proton Cleanup"),
-    ("?",        "Show this keyboard shortcuts reference"),
+    ("↑ / ↓", "Move selection up or down"),
+    ("/", "Open inline name-search bar"),
+    ("Escape", "Close search filter  ·  close any modal overlay"),
+    ("s", "Cycle column sort  (ascending → descending → next column)"),
+    ("o", "Toggle display of orphaned prefixes and unused tools"),
+    ("d", "Delete the highlighted environment  (opens confirmation)"),
+    ("r", "Re-run the full environment scan"),
+    ("e", "Export currently-visible entries to JSON file"),
+    ("Tab", "Move keyboard focus between widgets"),
+    ("q", "Quit Proton Cleanup"),
+    ("?", "Show this keyboard shortcuts reference"),
 ]
 
 
@@ -264,12 +264,15 @@ class ProtonManagerApp(App):
 
         if self._only_steam:
             from proton_manager.model import GameKind
+
             entries = [e for e in entries if e.kind == GameKind.STEAM]
         if self._only_shortcuts:
             from proton_manager.model import GameKind
+
             entries = [e for e in entries if e.kind == GameKind.SHORTCUT]
         if self._hide_orphans:
             from proton_manager.model import GameKind
+
             entries = [e for e in entries if e.kind not in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)]
 
         if self._min_confidence is not None:
@@ -299,10 +302,10 @@ class ProtonManagerApp(App):
             empty.add_class("active")
 
         from proton_manager.model import GameKind
+
         total_warnings = sum(bool(e.warnings) for e in visible)
         orphan_count = sum(
-            1 for e in self._all_entries
-            if e.kind in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)
+            1 for e in self._all_entries if e.kind in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)
         )
         self.query_one(StatusBar).set_counts(
             total=len(self._all_entries),
@@ -405,9 +408,7 @@ class ProtonManagerApp(App):
             if deleted is None:
                 return
             key = (deleted.app_id, deleted.kind)
-            self._all_entries = [
-                e for e in self._all_entries if (e.app_id, e.kind) != key
-            ]
+            self._all_entries = [e for e in self._all_entries if (e.app_id, e.kind) != key]
             self._refresh_table()
             self.notify(f"Deleted: {deleted.name}")
 

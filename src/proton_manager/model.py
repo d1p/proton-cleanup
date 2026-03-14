@@ -1,4 +1,5 @@
 """Data model: shared types consumed by scan modules, TUI, and JSON output."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -21,7 +22,7 @@ class Confidence(str, Enum):
     # Ordering for --min-confidence comparisons (highest → lowest)
     _order_ = "HIGH MEDIUM LOW UNKNOWN"
 
-    def __lt__(self, other: "Confidence") -> bool:
+    def __lt__(self, other: Confidence) -> bool:
         order = [Confidence.HIGH, Confidence.MEDIUM, Confidence.LOW, Confidence.UNKNOWN]
         return order.index(self) > order.index(other)
 

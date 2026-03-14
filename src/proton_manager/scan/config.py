@@ -1,4 +1,5 @@
 """Parse Steam's global config.vdf to obtain per-game compat tool mappings."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,18 +24,15 @@ def load_compat_tool_mapping(steam_root: Path) -> dict[str, str]:
         return {}
 
     try:
-        mapping: dict = (
-            data["InstallConfigStore"]["Software"]["Valve"]["Steam"]["CompatToolMapping"]
-        )
+        mapping: dict = data["InstallConfigStore"]["Software"]["Valve"]["Steam"][
+            "CompatToolMapping"
+        ]
     except (KeyError, TypeError):
         return {}
 
     result: dict[str, str] = {}
     for app_id, val in mapping.items():
-        if isinstance(val, dict):
-            name = val.get("name", "").strip()
-        else:
-            name = str(val).strip()
+        name = val.get("name", "").strip() if isinstance(val, dict) else str(val).strip()
         if name:
             result[str(app_id)] = name
 

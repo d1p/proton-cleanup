@@ -1,8 +1,9 @@
 """Reusable Textual widgets for the Proton Cleanup TUI."""
+
 from __future__ import annotations
 
-from textual.widgets import DataTable, Static
 from textual.reactive import reactive
+from textual.widgets import DataTable, Static
 
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.output import COLUMNS, entry_to_row
@@ -10,53 +11,53 @@ from proton_manager.output import COLUMNS, entry_to_row
 # ── Colour maps ─────────────────────────────────────────────────────────────
 # Confidence → Rich colour tag
 _CONF_COLOUR: dict[Confidence, str] = {
-    Confidence.HIGH:    "green",
-    Confidence.MEDIUM:  "yellow",
-    Confidence.LOW:     "red",
+    Confidence.HIGH: "green",
+    Confidence.MEDIUM: "yellow",
+    Confidence.LOW: "red",
     Confidence.UNKNOWN: "dim",
 }
 
 # Confidence → symbol  (colour alone must never be the sole indicator — WCAG 1.4.1)
 _CONF_SYMBOL: dict[Confidence, str] = {
-    Confidence.HIGH:    "●",   # solid circle
-    Confidence.MEDIUM:  "◑",   # half circle
-    Confidence.LOW:     "○",   # empty circle
-    Confidence.UNKNOWN: "·",   # dim dot
+    Confidence.HIGH: "●",  # solid circle
+    Confidence.MEDIUM: "◑",  # half circle
+    Confidence.LOW: "○",  # empty circle
+    Confidence.UNKNOWN: "·",  # dim dot
 }
 
 _STATUS_COLOUR: dict[str, str] = {
-    "OK":     "green",
-    "WARN":   "yellow",
+    "OK": "green",
+    "WARN": "yellow",
     "NO PFX": "cyan",
     "ORPHAN": "magenta",
     "UNUSED": "blue",
-    "—":      "dim",
+    "—": "dim",
 }
 
 # Status → symbol  (colour alone must never be the sole indicator — WCAG 1.4.1)
 _STATUS_SYMBOL: dict[str, str] = {
-    "OK":     "✓",   # checkmark — healthy prefix
-    "WARN":   "⚠",   # warning triangle
-    "NO PFX": "□",   # empty box — prefix directory absent
-    "ORPHAN": "?",   # question mark — no linked game
-    "UNUSED": "⊘",   # circled slash — tool not in use
-    "—":      "·",   # dim dot
+    "OK": "✓",  # checkmark — healthy prefix
+    "WARN": "⚠",  # warning triangle
+    "NO PFX": "□",  # empty box — prefix directory absent
+    "ORPHAN": "?",  # question mark — no linked game
+    "UNUSED": "⊘",  # circled slash — tool not in use
+    "—": "·",  # dim dot
 }
 
 # ── Kind icons and row tints ──────────────────────────────────────────────────
 # Kind → single-character icon prefix for the Kind column
 _KIND_ICON: dict[GameKind, str] = {
-    GameKind.STEAM:       "◆",   # filled diamond   — installed Steam game
-    GameKind.SHORTCUT:    "◇",   # open diamond     — non-Steam shortcut
-    GameKind.ORPHAN:      "◌",   # dotted circle    — prefix without a game
-    GameKind.UNUSED_TOOL: "⚙",   # gear             — tool without a game
+    GameKind.STEAM: "◆",  # filled diamond   — installed Steam game
+    GameKind.SHORTCUT: "◇",  # open diamond     — non-Steam shortcut
+    GameKind.ORPHAN: "◌",  # dotted circle    — prefix without a game
+    GameKind.UNUSED_TOOL: "⚙",  # gear             — tool without a game
 }
 
 # Kind → row colour override  (None = default foreground)
 _KIND_COLOUR: dict[GameKind, str | None] = {
-    GameKind.STEAM:       None,
-    GameKind.SHORTCUT:    None,
-    GameKind.ORPHAN:      "magenta",
+    GameKind.STEAM: None,
+    GameKind.SHORTCUT: None,
+    GameKind.ORPHAN: "magenta",
     GameKind.UNUSED_TOOL: "blue",
 }
 
@@ -178,8 +179,9 @@ class StatusBar(Static):
     }
     """
 
-    def set_counts(self, total: int, shown: int, warnings: int,
-                   orphans: int = 0, hide_orphans: bool = False) -> None:
+    def set_counts(
+        self, total: int, shown: int, warnings: int, orphans: int = 0, hide_orphans: bool = False
+    ) -> None:
         sep = "  [dim]│[/dim]  "
         parts: list[str] = [f"◈  {shown} of {total} entries"]
         if warnings:
