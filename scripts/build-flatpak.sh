@@ -2,9 +2,9 @@
 set -euo pipefail
 
 APP_ID="io.github.protoncleanup.ProtonCleanup"
-RUNTIME_VERSION="6.8"
-RUNTIME="org.kde.Platform"
-SDK="org.kde.Sdk"
+RUNTIME_VERSION="24.08"
+RUNTIME="org.freedesktop.Platform"
+SDK="org.freedesktop.Sdk"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$ROOT_DIR/flatpak/io.github.protoncleanup.ProtonCleanup.yaml"

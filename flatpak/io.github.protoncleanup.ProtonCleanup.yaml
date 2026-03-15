@@ -1,7 +1,7 @@
 app-id: io.github.protoncleanup.ProtonCleanup
-runtime: org.kde.Platform
-runtime-version: "6.8"
-sdk: org.kde.Sdk
+runtime: org.freedesktop.Platform
+runtime-version: "24.08"
+sdk: org.freedesktop.Sdk
 command: proton-cleanup
 
 finish-args:
@@ -18,6 +18,8 @@ modules:
     build-commands:
       - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels hatchling==1.27.0
       - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels vdf==3.4
+      - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels shiboken6==6.10.2
+      - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels PySide6-Essentials==6.10.2
       - python3 -m pip install --prefix=/app --no-index --find-links=flatpak/wheels --no-build-isolation --no-deps .
       - install -Dm644 data/io.github.protoncleanup.ProtonCleanup.desktop /app/share/applications/io.github.protoncleanup.ProtonCleanup.desktop
       - install -Dm644 data/io.github.protoncleanup.ProtonCleanup.metainfo.xml /app/share/metainfo/io.github.protoncleanup.ProtonCleanup.metainfo.xml
@@ -25,3 +27,11 @@ modules:
     sources:
       - type: dir
         path: ..
+      - type: file
+        url: https://files.pythonhosted.org/packages/52/88/292e0576489c46624ab419ee284ac5a59ae10e2eb34a58b6abca51dfd290/shiboken6-6.10.2-cp39-abi3-manylinux_2_34_x86_64.whl
+        sha256: ace0790032d9cb0adda644b94ee28d59410180d9773643bb6cf8438c361987ad
+        dest: flatpak/wheels
+      - type: file
+        url: https://files.pythonhosted.org/packages/99/20/3a6ca95052e1744b5a3eba164e2dd451d358a3dcaf78179de4b45c8e3f47/pyside6_essentials-6.10.2-cp39-abi3-manylinux_2_34_x86_64.whl
+        sha256: 660aea45bfa36f1e06f799b934c2a7df963bd31abc5083e8bb8a5bfaef45686b
+        dest: flatpak/wheels
