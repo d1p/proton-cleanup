@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 
-
 def _run_scan(steam_root_override: Path | None) -> tuple[list, list[str]]:
     """Execute the full scan pipeline and return (entries, global_warnings)."""
     from proton_manager.scan.config import load_compat_tool_mapping

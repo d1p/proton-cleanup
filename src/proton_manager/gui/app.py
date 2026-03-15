@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
-from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QApplication
 
 # Steam-inspired colour palette
@@ -23,169 +21,169 @@ _COLORS = {
 }
 
 _STYLESHEET = """
-QMainWindow, QWidget {
-    background-color: %(background)s;
-    color: %(text)s;
+QMainWindow, QWidget {{
+    background-color: {background};
+    color: {text};
     font-size: 13px;
-}
+}}
 
-QMenuBar, QMenuBar::item {
-    background-color: %(surface)s;
-    color: %(text)s;
-}
-QMenuBar::item:selected {
-    background-color: %(highlight)s;
-}
-QMenu {
-    background-color: %(surface)s;
-    color: %(text)s;
-    border: 1px solid %(highlight)s;
-}
-QMenu::item:selected {
-    background-color: %(highlight)s;
-}
+QMenuBar, QMenuBar::item {{
+    background-color: {surface};
+    color: {text};
+}}
+QMenuBar::item:selected {{
+    background-color: {highlight};
+}}
+QMenu {{
+    background-color: {surface};
+    color: {text};
+    border: 1px solid {highlight};
+}}
+QMenu::item:selected {{
+    background-color: {highlight};
+}}
 
-QToolBar {
-    background-color: %(surface)s;
+QToolBar {{
+    background-color: {surface};
     border: none;
     spacing: 4px;
     padding: 2px 4px;
-}
-QToolButton {
+}}
+QToolButton {{
     background-color: transparent;
-    color: %(text)s;
+    color: {text};
     border: 1px solid transparent;
     border-radius: 3px;
     padding: 3px 8px;
-}
-QToolButton:hover {
-    background-color: %(highlight)s;
-    border-color: %(accent)s;
-}
+}}
+QToolButton:hover {{
+    background-color: {highlight};
+    border-color: {accent};
+}}
 
-QLineEdit {
-    background-color: %(surface_alt)s;
-    color: %(text)s;
-    border: 1px solid %(highlight)s;
+QLineEdit {{
+    background-color: {surface_alt};
+    color: {text};
+    border: 1px solid {highlight};
     border-radius: 3px;
     padding: 3px 6px;
-    selection-background-color: %(highlight)s;
-}
-QLineEdit:focus {
-    border-color: %(accent)s;
-}
+    selection-background-color: {highlight};
+}}
+QLineEdit:focus {{
+    border-color: {accent};
+}}
 
-QTabWidget::pane {
-    border: 1px solid %(highlight)s;
-}
-QTabBar::tab {
-    background-color: %(surface)s;
-    color: %(text_dim)s;
-    border: 1px solid %(highlight)s;
+QTabWidget::pane {{
+    border: 1px solid {highlight};
+}}
+QTabBar::tab {{
+    background-color: {surface};
+    color: {text_dim};
+    border: 1px solid {highlight};
     border-bottom: none;
     padding: 4px 14px;
     min-width: 120px;
-}
-QTabBar::tab:selected {
-    background-color: %(background)s;
-    color: %(accent)s;
-    border-bottom: 2px solid %(accent)s;
-}
-QTabBar::tab:hover {
-    color: %(text)s;
-}
+}}
+QTabBar::tab:selected {{
+    background-color: {background};
+    color: {accent};
+    border-bottom: 2px solid {accent};
+}}
+QTabBar::tab:hover {{
+    color: {text};
+}}
 
-QTableView {
-    background-color: %(background)s;
-    alternate-background-color: %(surface_alt)s;
-    color: %(text)s;
-    gridline-color: %(surface)s;
-    selection-background-color: %(highlight)s;
-    selection-color: %(text)s;
+QTableView {{
+    background-color: {background};
+    alternate-background-color: {surface_alt};
+    color: {text};
+    gridline-color: {surface};
+    selection-background-color: {highlight};
+    selection-color: {text};
     border: none;
-}
-QTableView::item {
+}}
+QTableView::item {{
     padding: 4px 6px;
-}
-QHeaderView::section {
-    background-color: %(surface)s;
-    color: %(accent)s;
+}}
+QHeaderView::section {{
+    background-color: {surface};
+    color: {accent};
     border: none;
-    border-right: 1px solid %(highlight)s;
+    border-right: 1px solid {highlight};
     padding: 4px 6px;
     font-weight: bold;
-}
+}}
 
-QSplitter::handle {
-    background-color: %(surface)s;
+QSplitter::handle {{
+    background-color: {surface};
     height: 3px;
-}
+}}
 
-QFrame[frameShape="4"], QFrame[frameShape="5"] {
-    color: %(highlight)s;
-}
+QFrame[frameShape="4"], QFrame[frameShape="5"] {{
+    color: {highlight};
+}}
 
-QLabel {
-    color: %(text)s;
-}
+QLabel {{
+    color: {text};
+}}
 
-QStatusBar {
-    background-color: %(surface)s;
-    color: %(text_dim)s;
-}
-QStatusBar QLabel {
-    color: %(text_dim)s;
-}
+QStatusBar {{
+    background-color: {surface};
+    color: {text_dim};
+}}
+QStatusBar QLabel {{
+    color: {text_dim};
+}}
 
-QDialog {
-    background-color: %(background)s;
-}
+QDialog {{
+    background-color: {background};
+}}
 
-QListWidget {
-    background-color: %(surface_alt)s;
-    color: %(text)s;
-    border: 1px solid %(highlight)s;
+QListWidget {{
+    background-color: {surface_alt};
+    color: {text};
+    border: 1px solid {highlight};
     border-radius: 3px;
-}
-QListWidget::item:selected {
-    background-color: %(highlight)s;
-}
+}}
+QListWidget::item:selected {{
+    background-color: {highlight};
+}}
 
-QDialogButtonBox QPushButton {
-    background-color: %(surface)s;
-    color: %(text)s;
-    border: 1px solid %(highlight)s;
+QDialogButtonBox QPushButton {{
+    background-color: {surface};
+    color: {text};
+    border: 1px solid {highlight};
     border-radius: 3px;
     padding: 5px 14px;
     min-width: 72px;
-}
-QDialogButtonBox QPushButton:hover {
-    background-color: %(highlight)s;
-}
-QPushButton#deleteButton {
+}}
+QDialogButtonBox QPushButton:hover {{
+    background-color: {highlight};
+}}
+QPushButton#deleteButton {{
     background-color: #7a2020;
     color: #ffcccc;
-    border: 1px solid %(error)s;
-}
-QPushButton#deleteButton:hover {
-    background-color: %(error)s;
+    border: 1px solid {error};
+}}
+QPushButton#deleteButton:hover {{
+    background-color: {error};
     color: white;
-}
+}}
 
-QScrollBar:vertical {
-    background-color: %(surface_alt)s;
+QScrollBar:vertical {{
+    background-color: {surface_alt};
     width: 10px;
     border-radius: 4px;
-}
-QScrollBar::handle:vertical {
-    background-color: %(highlight)s;
+}}
+QScrollBar::handle:vertical {{
+    background-color: {highlight};
     border-radius: 4px;
     min-height: 20px;
-}
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+}}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0;
-}
-""" % _COLORS
+}}
+""".format(**_COLORS)
 
 
 def create_application(argv: list[str] | None = None) -> QApplication:

@@ -16,15 +16,13 @@ from PySide6.QtWidgets import (
     QSplitter,
     QStatusBar,
     QToolBar,
-    QVBoxLayout,
-    QWidget,
 )
 
-from proton_manager.model import GameEntry
-from proton_manager.gui.tabs import TabView
-from proton_manager.gui.detail_panel import DetailPanel
 from proton_manager.gui.delete_dialog import DeleteDialog
+from proton_manager.gui.detail_panel import DetailPanel
+from proton_manager.gui.tabs import TabView
 from proton_manager.gui.workers import ScanWorker, SizeWorker
+from proton_manager.model import GameEntry
 
 _ICON_PATH = Path(__file__).parent.parent.parent.parent / (
     "data/icons/io.github.protoncleanup.ProtonCleanup.png"
@@ -156,9 +154,7 @@ class MainWindow(QMainWindow):
         self._detail.show_entry(None)
 
         warn_txt = f"  ⚠ {len(warnings)} warning(s)" if warnings else ""
-        self._status_label.setText(
-            f"{len(entries)} entries{warn_txt}  —  Calculating sizes…"
-        )
+        self._status_label.setText(f"{len(entries)} entries{warn_txt}  —  Calculating sizes…")
         self._start_size_worker()
 
     def _on_scan_error(self, message: str) -> None:
@@ -194,9 +190,7 @@ class MainWindow(QMainWindow):
 
     def _on_sizes_done(self) -> None:
         total = sum(e.prefix_size or 0 for e in self._entries)
-        self._status_label.setText(
-            f"{len(self._entries)} entries  —  Total: {self._human(total)}"
-        )
+        self._status_label.setText(f"{len(self._entries)} entries  —  Total: {self._human(total)}")
 
     # ------------------------------------------------------------------
     # Filtering
@@ -228,9 +222,7 @@ class MainWindow(QMainWindow):
             if deleted:
                 # Remove deleted entries from the list and refresh
                 deleted_keys = {(e.app_id, e.kind) for e in deleted}
-                self._entries = [
-                    e for e in self._entries if (e.app_id, e.kind) not in deleted_keys
-                ]
+                self._entries = [e for e in self._entries if (e.app_id, e.kind) not in deleted_keys]
                 self._tabs.set_entries(self._entries)
                 self._detail.show_entry(None)
                 self._status_label.setText(

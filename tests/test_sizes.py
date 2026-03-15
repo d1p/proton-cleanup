@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from proton_manager.scan.sizes import calc_dir_size
 
 

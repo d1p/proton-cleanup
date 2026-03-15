@@ -4,11 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from proton_manager.delete import delete_entry, deleteable_path, entry_timestamps
 from proton_manager.model import Confidence, GameEntry, GameKind
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

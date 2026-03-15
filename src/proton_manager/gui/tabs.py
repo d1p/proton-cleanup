@@ -5,8 +5,8 @@ from __future__ import annotations
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QTabWidget
 
-from proton_manager.model import GameEntry, GameKind
 from proton_manager.gui.game_table import GameTableView
+from proton_manager.model import GameEntry, GameKind
 
 
 class TabView(QTabWidget):
@@ -16,8 +16,8 @@ class TabView(QTabWidget):
     that aggregates across all tabs.
     """
 
-    entry_selected: Signal = Signal(object)   # GameEntry | None
-    delete_requested: Signal = Signal(list)    # list[GameEntry]
+    entry_selected: Signal = Signal(object)  # GameEntry | None
+    delete_requested: Signal = Signal(list)  # list[GameEntry]
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,9 +42,7 @@ class TabView(QTabWidget):
     def set_entries(self, entries: list[GameEntry]) -> None:
         steam = [e for e in entries if e.kind == GameKind.STEAM]
         shortcuts = [e for e in entries if e.kind == GameKind.SHORTCUT]
-        orphans = [
-            e for e in entries if e.kind in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)
-        ]
+        orphans = [e for e in entries if e.kind in (GameKind.ORPHAN, GameKind.UNUSED_TOOL)]
         self._steam_table.set_entries(steam)
         self._shortcuts_table.set_entries(shortcuts)
         self._orphans_table.set_entries(orphans)

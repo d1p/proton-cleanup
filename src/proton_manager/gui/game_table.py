@@ -186,7 +186,7 @@ class GameTableView(QTableView):
     """Styled QTableView with sort support and entry-selection signal."""
 
     entry_selected: Signal = Signal(object)  # GameEntry | None
-    delete_requested: Signal = Signal(list)   # list[GameEntry]
+    delete_requested: Signal = Signal(list)  # list[GameEntry]
 
     def __init__(self, entries: list[GameEntry] | None = None) -> None:
         super().__init__()

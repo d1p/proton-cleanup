@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QLabel,
     QListWidget,
-    QMessageBox,
     QPushButton,
     QSizePolicy,
     QVBoxLayout,
@@ -71,9 +70,7 @@ class DeleteDialog(QDialog):
                 f"<b style='color:#e05050;'>Total space freed: {self._human(total)}</b>"
             )
         else:
-            total_label.setText(
-                "<span style='color:#888;'>Calculating sizes…</span>"
-            )
+            total_label.setText("<span style='color:#888;'>Calculating sizes…</span>")
         total_label.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(total_label)
 
@@ -147,9 +144,7 @@ class DeleteDialog(QDialog):
 
         if errors:
             self._error_label.setText(
-                "<span style='color:#e05050;'>"
-                + "<br/>".join(errors)
-                + "</span>"
+                "<span style='color:#e05050;'>" + "<br/>".join(errors) + "</span>"
             )
             self._error_label.setVisible(True)
         else:

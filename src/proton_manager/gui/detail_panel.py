@@ -50,9 +50,7 @@ class DetailPanel(QFrame):
     def show_entry(self, entry: GameEntry | None) -> None:
         if entry is None:
             self._label.setText(
-                "<span style='color:#888;font-style:italic;'>"
-                "Select a row to view details."
-                "</span>"
+                "<span style='color:#888;font-style:italic;'>Select a row to view details.</span>"
             )
             return
 
@@ -99,8 +97,4 @@ class DetailPanel(QFrame):
 
     @staticmethod
     def _esc(text: str) -> str:
-        return (
-            text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-        )
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")

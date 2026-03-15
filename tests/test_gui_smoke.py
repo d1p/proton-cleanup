@@ -14,7 +14,6 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from proton_manager.model import Confidence, GameEntry, GameKind  # noqa: E402
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -84,7 +83,7 @@ def test_game_table_model_row_count(qapp) -> None:
 
 
 def test_game_table_model_column_count(qapp) -> None:
-    from proton_manager.gui.game_table import GameTableModel, _COLUMNS
+    from proton_manager.gui.game_table import _COLUMNS, GameTableModel
 
     model = GameTableModel(_sample_entries())
     assert model.columnCount() == len(_COLUMNS)
@@ -110,8 +109,9 @@ def test_game_table_model_set_entries(qapp) -> None:
 
 
 def test_game_table_model_update_size(qapp) -> None:
-    from proton_manager.gui.game_table import GameTableModel, _COL_NAMES
     from PySide6.QtCore import Qt
+
+    from proton_manager.gui.game_table import _COL_NAMES, GameTableModel
 
     model = GameTableModel(_sample_entries())
     model.update_size("100", GameKind.STEAM.value, 1024 * 1024 * 500)
