@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from unittest.mock import patch
-
 from proton_manager.model import Confidence, GameEntry, GameKind
 from proton_manager.scan.orphans import scan_orphans
 from proton_manager.scan.proton_tools import discover_proton_tools
@@ -183,39 +180,3 @@ def test_full_scan_includes_orphans(steam_root):
     orphans = scan_orphans([steamapps], known, tools)
     orphan_ids = [e.app_id for e in orphans if e.kind == GameKind.ORPHAN]
     assert "88888" in orphan_ids
-
-
-# ---------------------------------------------------------------------------
-# CLI --hide-orphans flag
-# ---------------------------------------------------------------------------
-
-
-def test_cli_json_includes_orphans_by_default(steam_root, capsys):
-    # Add orphan prefix
-    orphan_dir = steam_root / "steamapps" / "compatdata" / "77777" / "pfx" / "drive_c"
-    orphan_dir.mkdir(parents=True)
-
-    with patch("sys.argv", ["proton-manager", "--json", f"--steam-root={steam_root}"]):
-        from proton_manager.cli import main
-
-        main()
-
-    data = json.loads(capsys.readouterr().out)
-    kinds = {row["kind"] for row in data}
-    assert "Orphan" in kinds
-
-
-def test_cli_json_hide_orphans(steam_root, capsys):
-    orphan_dir = steam_root / "steamapps" / "compatdata" / "77777" / "pfx" / "drive_c"
-    orphan_dir.mkdir(parents=True)
-
-    with patch(
-        "sys.argv",
-        ["proton-manager", "--json", "--hide-orphans", f"--steam-root={steam_root}"],
-    ):
-        from proton_manager.cli import main
-
-        main()
-
-    data = json.loads(capsys.readouterr().out)
-    assert not any(row["kind"] in ("Orphan", "Unused Tool") for row in data)

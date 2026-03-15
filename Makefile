@@ -10,7 +10,7 @@ dev:  ## Install in editable mode with dev dependencies
 	$(PYTHON) -m pip install -e ".[dev]"
 
 test:  ## Run the test suite
-	$(PYTHON) -m pytest -q
+	QT_QPA_PLATFORM=offscreen $(PYTHON) -m pytest -q
 
 lint:  ## Run ruff linter (install with: pip install ruff)
 	$(PYTHON) -m ruff check src tests

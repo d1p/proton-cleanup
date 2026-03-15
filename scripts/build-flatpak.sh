@@ -2,7 +2,9 @@
 set -euo pipefail
 
 APP_ID="io.github.protoncleanup.ProtonCleanup"
-RUNTIME_VERSION="24.08"
+RUNTIME_VERSION="6.8"
+RUNTIME="org.kde.Platform"
+SDK="org.kde.Sdk"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$ROOT_DIR/flatpak/io.github.protoncleanup.ProtonCleanup.yaml"
@@ -25,8 +27,8 @@ fi
 mkdir -p "$ROOT_DIR/dist"
 
 # Ensure required runtime/toolchain is available for the current user.
-flatpak --user install -y flathub "org.freedesktop.Platform//$RUNTIME_VERSION"
-flatpak --user install -y flathub "org.freedesktop.Sdk//$RUNTIME_VERSION"
+flatpak --user install -y flathub "$RUNTIME//$RUNTIME_VERSION"
+flatpak --user install -y flathub "$SDK//$RUNTIME_VERSION"
 
 flatpak-builder --user --force-clean --repo="$REPO_DIR" "$BUILD_DIR" "$MANIFEST"
 flatpak build-bundle "$REPO_DIR" "$BUNDLE_PATH" "$APP_ID"

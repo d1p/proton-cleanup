@@ -1,4 +1,4 @@
-"""Data model: shared types consumed by scan modules, TUI, and JSON output."""
+"""Data model: shared types consumed by scan modules, GUI, and JSON output."""
 
 from __future__ import annotations
 
@@ -76,3 +76,16 @@ class GameEntry:
     """Human-readable evidence items explaining the mapping."""
     warnings: list[str] = field(default_factory=list)
     """Non-fatal anomalies (missing prefix, uninstalled tool, etc.)."""
+    prefix_size: int | None = None
+    """Disk usage in bytes of the prefix/tool directory.  None until calculated."""
+
+    def human_size(self) -> str:
+        """Return a human-readable size string, or '—' if not yet calculated."""
+        if self.prefix_size is None:
+            return "—"
+        n: float = self.prefix_size
+        for unit in ("B", "KB", "MB", "GB", "TB"):
+            if n < 1024 or unit == "TB":
+                return f"{n:.1f} {unit}" if unit != "B" else f"{int(n)} B"
+            n /= 1024
+        return "—"  # unreachable
