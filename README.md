@@ -1,11 +1,12 @@
 # Proton Cleanup
 
-A terminal app for **Steam Deck** and any **Linux desktop** that answers one question:
+A desktop app for **Steam Deck** and any **Linux desktop** that answers one question:
 
 > *Which Proton compatibility layer is each of my games actually using — and is everything set up correctly?*
 
 It scans your Steam library, non-Steam shortcuts, installed Proton tools, and Wine
-prefixes, then shows everything in an interactive table you can search, sort, and act on.
+prefixes, then shows everything in a Qt GUI with an OLED dark theme — search, sort,
+filter by tab, and delete entries you no longer need.
 
 ---
 
@@ -18,14 +19,12 @@ prefixes, then shows everything in an interactive table you can search, sort, an
 5. [Flatpak package (no Python setup)](#flatpak-package-no-python-setup)
 6. [Launching the app](#launching-the-app)
 7. [Understanding the table](#understanding-the-table)
-8. [Using the TUI (keyboard guide)](#using-the-tui-keyboard-guide)
+8. [Using the GUI](#using-the-gui)
 9. [Deleting an environment](#deleting-an-environment)
-10. [Command-line flags](#command-line-flags)
-11. [JSON output for scripting](#json-output-for-scripting)
-12. [Confidence levels explained](#confidence-levels-explained)
-13. [Row types explained](#row-types-explained)
-14. [Frequently asked questions](#frequently-asked-questions)
-15. [For developers](#for-developers)
+10. [Confidence levels explained](#confidence-levels-explained)
+11. [Row types explained](#row-types-explained)
+12. [Frequently asked questions](#frequently-asked-questions)
+13. [For developers](#for-developers)
 
 ---
 
@@ -68,9 +67,9 @@ environment:
 | Unused tools | Proton tools installed in `compatibilitytools.d/` that no game currently uses |
 | Prefix creation and last-used dates | File-system timestamps on the prefix directory |
 
-Results are shown in an interactive full-screen table.  You can search, sort, filter
-by type, and delete entries you no longer need — all without opening a file manager or
-running manual `rm` commands.
+Results are shown in a desktop GUI with tabbed views for Steam games, shortcuts, and
+orphans.  You can search, sort, and delete entries you no longer need — all without
+opening a file manager or running manual `rm` commands.
 
 ---
 
@@ -170,10 +169,10 @@ If installed as Flatpak:
 flatpak run io.github.protoncleanup.ProtonCleanup
 ```
 
-The full-screen TUI opens immediately and begins scanning.  On a typical Steam Deck
+The app opens immediately and begins scanning.  On a typical Steam Deck
 with 50–100 games the scan finishes in under a second.
 
-To exit cleanly, press **`q`** or **`Ctrl+C`**.
+To exit, close the window or press **Ctrl+Q**.
 
 ---
 
@@ -184,49 +183,69 @@ Each row represents one game, shortcut, orphaned prefix, or unused tool.  The co
 | Column | What it shows |
 |---|---|
 | **Game** | Game name from Steam or your shortcuts file |
-| **Kind** | ◆ Steam · ◇ Shortcut · ◌ Orphan · ⚙ Unused Tool |
 | **App ID** | Steam's numeric identifier for the game |
 | **Tool** | Name of the Proton build being used (e.g. `GE-Proton10-25`, `Proton 9.0`) |
 | **Version** | Version tag read from the prefix `version` file |
-| **Prefix** | Path to the Wine prefix directory (`~/` paths are shortened) |
+| **Size** | On-disk size of the Wine prefix directory |
 | **Confidence** | How certain we are about the tool mapping — see [Confidence levels](#confidence-levels-explained) |
-| **Status** | ✓ OK · ⚠ WARN · □ NO PFX · ? ORPHAN · ⊘ UNUSED |
+| **Status** | OK · Warn · No Pfx · Orphan · Unused |
 
-### Status icons at a glance
+### Status values at a glance
 
-| Icon | Status | Meaning |
-|---|---|---|
-| ✓ | **OK** | Prefix exists and tool is installed — everything is healthy |
-| ⚠ | **WARN** | Something needs attention (check the details pane below for specifics) |
-| □ | **NO PFX** | Proton tool is set but the Wine prefix folder has not been created yet (game has never been launched) |
-| ? | **ORPHAN** | A prefix folder exists but no matching game is installed — likely left over from an uninstalled game |
-| ⊘ | **UNUSED** | A Proton tool is installed but no game is configured to use it |
+| Status | Meaning |
+|---|---|
+| **OK** | Prefix exists and tool is installed — everything is healthy |
+| **Warn** | Something needs attention (check the details panel below for specifics) |
+| **No Pfx** | Proton tool is set but the Wine prefix folder has not been created yet (game has never been launched) |
+| **Orphan** | A prefix folder exists but no matching game is installed — likely left over from an uninstalled game |
+| **Unused** | A Proton tool is installed but no game is configured to use it |
 
-The **details pane** at the bottom of the screen shows the full evidence list and any
+The **details panel** at the bottom of the window shows the full evidence list and any
 warnings for the currently highlighted row.
 
 ---
 
-## Using the TUI (keyboard guide)
+## Using the GUI
 
-You do not need a mouse.  Every action is a single key press.
+The interface is built with PySide6 (Qt) and features an OLED dark theme with true
+black backgrounds.
+
+### Tabs
+
+Entries are grouped into three tabs:
+
+- **Steam Games** — games from your Steam library
+- **Shortcuts** — non-Steam games added through Steam (GOG, itch.io, emulators, etc.)
+- **Orphans & Tools** — orphaned prefixes and unused Proton tools
+
+### Toolbar
+
+The toolbar at the top provides quick access to common actions:
+
+- **⟳ Rescan** — re-run the full scan (also available via **F5**)
+- **🔍 Filter** — type in the search box to filter rows by game name
+- **🗑 Delete** — delete the selected entries (also available via **Delete** key)
+
+### Menu bar
+
+| Menu | Action | Shortcut |
+|---|---|---|
+| File | Rescan | F5 |
+| File | Export JSON… | Ctrl+E |
+| File | Quit | Ctrl+Q |
+| Help | About | — |
+
+### Keyboard shortcuts
 
 | Key | What it does |
 |---|---|
-| **↑ / ↓** | Move the selection up or down one row |
-| **Space** | Toggle selection on the highlighted row (for multi-select deletion) |
-| **/** | Open the search bar — start typing a game name to filter |
-| **Escape** | Close the search bar (and clear it) · also closes any open dialog |
-| **s** | Cycle sort: press once to sort ascending, again for descending, again for the next column |
-| **o** | Toggle the display of orphaned prefixes and unused tools on/off |
-| **d** | Delete the highlighted row, or all selected rows if any are marked with Space |
-| **r** | Re-run the full scan (useful after installing or removing a game) |
-| **e** | Export the currently visible rows to `proton-cleanup-export.json` in the current folder |
-| **?** | Open the on-screen keyboard shortcut reference |
-| **q** | Quit |
+| **F5** | Re-run the full scan |
+| **Ctrl+E** | Export currently visible entries to a JSON file |
+| **Delete** | Delete the selected entry or entries |
+| **Ctrl+Q** | Quit the application |
 
-> **Steam Deck tip:** In desktop mode you can use the touch screen to scroll the table.
-> The on-screen keyboard works for the search bar.
+> **Steam Deck tip:** In desktop mode you can use the touch screen to interact with
+> the table and buttons.
 
 ---
 
@@ -243,25 +262,21 @@ Proton Cleanup can permanently remove a Wine prefix or an unused Proton tool.
 
 ### Deleting a single entry
 
-1. Use **↑ / ↓** to highlight the row you want to remove
-2. Press **`d`**
+1. Click on the row you want to remove in the table
+2. Press **Delete** or click **🗑 Delete** in the toolbar
 3. A confirmation dialog opens showing the game name, full path, and timestamps
 4. Read the warning carefully — **this cannot be undone**
-5. Click **⚠ Delete** (or press **Enter**) to confirm
+5. Click **Delete** to confirm
 6. The row disappears from the table and the directory is gone
 
 ### Deleting multiple entries at once
 
-1. Navigate to a row and press **`Space`** to mark it — a `☑` appears in the Game column
-2. Move to other rows and press **`Space`** to mark them too
-3. Press **`d`** — the confirmation dialog lists all marked entries
-4. Click **⚠ Delete** to remove all of them in one go
+1. Select multiple rows by holding **Ctrl** or **Shift** while clicking
+2. Press **Delete** or click **🗑 Delete** in the toolbar
+3. The confirmation dialog lists all selected entries
+4. Click **Delete** to remove all of them in one go
 
-Marked rows show `☑`; unmarked rows show `☐`.  Pressing **`Space`** again on a marked
-row deselects it.  If no rows are marked when you press **`d`**, the highlighted row is
-used (single-entry behaviour).
-
-Press **Escape** or click **Cancel** to close the dialog without deleting anything.
+Click **Cancel** to close the dialog without deleting anything.
 
 ### Safety limits
 
@@ -269,73 +284,6 @@ The deletion code includes a built-in safety check.  It will only delete directo
 whose parent folder is named `compatdata` or `compatibilitytools.d`.  This prevents
 any accidental deletion outside of the expected Steam directories, even if a
 configuration file were somehow corrupted.
-
----
-
-## Command-line flags
-
-You can customise behaviour without entering the TUI by passing flags to
-`proton-cleanup`:
-
-| Flag | Description |
-|---|---|
-| `--steam-root PATH` | Override the auto-detected Steam root (useful for non-standard install locations) |
-| `--json` | Print results as JSON and exit — no TUI opened |
-| `--only-steam` | Show only Steam library games (hide shortcuts, orphans, unused tools) |
-| `--only-shortcuts` | Show only non-Steam shortcuts |
-| `--hide-orphans` | Hide orphaned prefixes and unused Proton tools |
-| `--min-confidence LEVEL` | Hide entries with a confidence below `HIGH`, `MEDIUM`, or `LOW` |
-| `--version` | Print the version number and exit |
-| `--help` | Print a brief help message and exit |
-
-### Examples
-
-```bash
-# Just see your Steam games with HIGH confidence
-proton-cleanup --only-steam --min-confidence HIGH
-
-# Find all orphaned prefixes without opening the TUI
-proton-cleanup --json | python3 -m json.tool | grep -A5 '"kind": "Orphan"'
-
-# Use a custom Steam root (e.g. external drive)
-proton-cleanup --steam-root /run/media/deck/SSD/Steam
-```
-
----
-
-## JSON output for scripting
-
-`--json` prints a JSON array to stdout.  Each object has these fields:
-
-```jsonc
-{
-  "app_id": "1091500",               // Steam App ID (or "tool:<name>" for unused tools)
-  "name": "Cyberpunk 2077",
-  "kind": "Steam",                   // "Steam" | "Shortcut" | "Orphan" | "Unused Tool"
-  "proton_tool": "GE-Proton10-25",   // null if unknown
-  "proton_version": "10-25",         // null if not found
-  "prefix_path": "/home/deck/.steam/root/steamapps/compatdata/1091500",
-  "prefix_exists": true,
-  "tool_installed": true,
-  "confidence": "HIGH",              // "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN"
-  "evidence": [                      // list of strings explaining how the mapping was found
-    "CompatToolMapping override: GE-Proton10-25",
-    "Prefix exists: /home/deck/..."
-  ],
-  "warnings": []                     // non-fatal issues found during scanning
-}
-```
-
-Combine with `jq` for easy filtering:
-
-```bash
-# List all games not using GE-Proton
-proton-cleanup --json | jq '.[] | select(.kind=="Steam") | select(.proton_tool | test("GE") | not) | .name'
-
-# Find every orphaned prefix and how big it is
-proton-cleanup --json | jq -r '.[] | select(.kind=="Orphan") | .prefix_path' \
-  | xargs -I{} du -sh {}
-```
 
 ---
 
@@ -375,7 +323,7 @@ need Proton at all.
 The App ID in the prefix folder does not match anything in your `steamapps/` manifests.
 This can happen if you moved the game to a different library drive — the manifest is now
 on the other drive, but the prefix stayed in the original location.  Re-running after
-pointing Steam at all drives (`r`) should resolve it.
+pointing Steam at all drives (press **F5** to rescan) should resolve it.
 
 ---
 
@@ -392,7 +340,7 @@ connected them.
 **Q: The tool column shows `—` for a game I know uses Proton.**
 
 The game's CompatToolMapping entry is missing or the tool was set globally rather than
-per-game.  Try launching the game once through Steam, then press **`r`** to rescan —
+per-game.  Try launching the game once through Steam, then press **F5** to rescan —
 Steam writes the override when the game starts.
 
 ---
@@ -421,10 +369,10 @@ Steam Deck runtime.  Both install locations are detected automatically.
 
 ---
 
-**Q: Can I run this without the TUI (e.g. in a script or cron job)?**
+**Q: Can I export data for scripting?**
 
-Yes — use `--json` and pipe the output to `jq`, `python3`, or whatever you like.
-No terminal interaction is needed, no interactive input is required.
+Yes — use **File → Export JSON** (Ctrl+E) to save the currently visible entries as a
+JSON file.  You can then process it with `jq`, `python3`, or any other tool.
 
 ---
 
@@ -456,21 +404,27 @@ proton-cleanup/
 │   └── build-flatpak.sh
 ├── src/proton_manager/            # Application source
 │   ├── __init__.py
-│   ├── cli.py                     # argparse entry point + scan pipeline
-│   ├── model.py                   # Shared dataclasses
-│   ├── output.py                  # Table-row adapter and JSON serialisation
-│   ├── scan/                      # Steam environment scanning modules
-│   │   ├── config.py
-│   │   ├── libraries.py
-│   │   ├── orphans.py
-│   │   ├── proton_tools.py
-│   │   ├── shortcuts.py
-│   │   ├── steam_games.py
-│   │   └── steam_roots.py
-│   └── tui/                       # Interactive terminal UI (Textual)
-│       ├── app.py
-│       ├── delete_dialog.py
-│       └── widgets.py
+│   ├── __main__.py                # python -m proton_manager entry point
+│   ├── cli.py                     # Entry point, scan pipeline, GUI launch
+│   ├── delete.py                  # Deletion logic and safety checks
+│   ├── model.py                   # Shared dataclasses (GameEntry, etc.)
+│   ├── gui/                       # PySide6 (Qt) desktop GUI
+│   │   ├── app.py                 # QApplication setup & OLED dark theme
+│   │   ├── delete_dialog.py       # Confirmation dialog for deletions
+│   │   ├── detail_panel.py        # Bottom panel: evidence & warnings
+│   │   ├── game_table.py          # Table model & view for game entries
+│   │   ├── main_window.py         # Top-level window, toolbar, menus
+│   │   ├── tabs.py                # Tabbed view (Steam / Shortcuts / Orphans)
+│   │   └── workers.py             # Background threads (scan, size calc)
+│   └── scan/                      # Steam environment scanning modules
+│       ├── config.py
+│       ├── libraries.py
+│       ├── orphans.py
+│       ├── proton_tools.py
+│       ├── shortcuts.py
+│       ├── sizes.py
+│       ├── steam_games.py
+│       └── steam_roots.py
 └── tests/                         # pytest suite
 ```
 
@@ -514,9 +468,9 @@ flatpak --user install --bundle -y dist/proton-cleanup.flatpak
 
 | Package | Purpose |
 |---|---|
-| `textual >= 0.82.0` | Full-screen TUI framework (widgets, CSS, themes) |
+| `PySide6-Essentials >= 6.7` | Qt desktop GUI framework (widgets, layouts, threading) |
 | `vdf >= 3.4` | Parse Valve Data Format (`.acf`, `config.vdf`, `shortcuts.vdf`) |
-| `pytest` + `pytest-asyncio` | Testing (dev only) |
+| `pytest` | Testing (dev only) |
 
 ### Key data sources
 

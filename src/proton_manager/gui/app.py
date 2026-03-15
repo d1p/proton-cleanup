@@ -1,4 +1,4 @@
-"""PySide6 application setup with Steam-inspired dark theme."""
+"""PySide6 application setup with OLED dark theme."""
 
 from __future__ import annotations
 
@@ -6,17 +6,17 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-# Steam-inspired colour palette
+# OLED dark colour palette
 _COLORS = {
-    "background": "#1b2838",
-    "surface": "#2a475e",
-    "surface_alt": "#213447",
+    "background": "#000000",
+    "surface": "#0a0a0a",
+    "surface_alt": "#111111",
     "accent": "#66c0f4",
     "accent2": "#57cbde",
-    "text": "#c6d4df",
-    "text_dim": "#8f98a0",
-    "highlight": "#4d8bb5",
-    "error": "#e05050",
+    "text": "#e0e0e0",
+    "text_dim": "#808080",
+    "highlight": "#1a1a2e",
+    "error": "#cf6679",
     "warn": "#e0a840",
 }
 
